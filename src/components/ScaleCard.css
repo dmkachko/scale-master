@@ -14,7 +14,7 @@
 
 .scale-card:hover {
   background-color: var(--color-bg-tertiary);
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-text-muted);
   transform: translateY(-2px);
   box-shadow: var(--shadow-brand);
 }
