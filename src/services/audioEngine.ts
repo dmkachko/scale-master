@@ -66,6 +66,40 @@ class AudioEngine {
   }
 
   /**
+   * Play a chord (multiple notes simultaneously)
+   */
+  async playChord(notes: string[], octave: number = 4, duration: string = '2n'): Promise<void> {
+    await this.initialize();
+
+    const synth = this.getActiveSynth();
+    if (!synth) return;
+
+    const prefs = usePreferencesStore.getState();
+    const notesWithOctave = notes.map((note) => `${note}${octave}`);
+    synth.triggerAttackRelease(notesWithOctave, duration, undefined, prefs.velocitySettings.normal);
+  }
+
+  /**
+   * Play an arpeggio (notes in sequence)
+   */
+  async playArpeggio(notes: string[], octave: number = 4): Promise<void> {
+    await this.initialize();
+
+    const synth = this.getActiveSynth();
+    if (!synth) return;
+
+    const prefs = usePreferencesStore.getState();
+    const now = Tone.now();
+    const noteDuration = 0.2; // 200ms per note
+
+    notes.forEach((note, i) => {
+      const noteWithOctave = `${note}${octave}`;
+      const time = now + i * noteDuration;
+      synth.triggerAttackRelease(noteWithOctave, '8n', time, prefs.velocitySettings.normal);
+    });
+  }
+
+  /**
    * Start playing a sequence of notes in a loop
    */
   async startSequence(
@@ -97,11 +131,15 @@ class AudioEngine {
     const store = useAudioStore.getState();
     const prefs = usePreferencesStore.getState();
 
+    // Get pattern steps to map sequence index to scale degree
+    const patternSteps = generateNoteSequence(notes, pattern);
+
     // Create note events - notes play continuously
     const noteEvents: Array<{
       time: string;
       note: string;
       index: number;
+      step: number | null; // Which scale degree (0-7, or null for silence)
       isAccent: boolean;
       octaveOffset: number;
       isSilence: boolean;
@@ -111,10 +149,21 @@ class AudioEngine {
         ? (i % 3 === 0)  // Every 3rd note in 3/4
         : (i % 4 === 0); // Every 4th note in 4/4
 
+      // Determine which scale degree this is (0-6 for notes, or 0 for octave-up tonic)
+      let step: number | null = null;
+      if (item.note !== '') {
+        // Find which note this is in the scale
+        const noteIndex = notes.indexOf(item.note);
+        if (noteIndex !== -1) {
+          step = noteIndex;
+        }
+      }
+
       return {
         time: this.calculateBeatTime(i),
         note: item.note,
         index: i,
+        step,
         isAccent,
         octaveOffset: item.octaveOffset,
         isSilence: item.note === '', // Empty string means silence
@@ -139,7 +188,7 @@ class AudioEngine {
       if (value.isSilence) {
         // Clear current note index during silence
         Tone.Draw.schedule(() => {
-          store.setCurrentNoteIndex(null);
+          store.setCurrentNote(null, null);
         }, time);
         return;
       }
@@ -160,7 +209,7 @@ class AudioEngine {
 
       // Schedule the callback to run at the correct time
       Tone.Draw.schedule(() => {
-        store.setCurrentNoteIndex(value.index);
+        store.setCurrentNote(value.index, value.step);
       }, time);
     }, noteEvents);
 

@@ -17,6 +17,7 @@ interface UseAudioPlaybackReturn {
   isPlaying: boolean;
   isActiveScale: boolean;
   currentNoteIndex: number | null;
+  currentNoteStep: number | null;
   playNote: (note: string, octave?: number) => Promise<void>;
   togglePlayback: (notes: string[], timeSignature: '4/4' | '3/4', tempo: number, pattern: ScalePattern, octave?: number) => Promise<void>;
 }
@@ -25,6 +26,7 @@ export function useAudioPlayback({ scaleId }: UseAudioPlaybackParams): UseAudioP
   const isPlaying = useAudioStore((state) => state.isPlaying);
   const activeScaleId = useAudioStore((state) => state.activeScaleId);
   const currentNoteIndex = useAudioStore((state) => state.currentNoteIndex);
+  const currentNoteStep = useAudioStore((state) => state.currentNoteStep);
 
   const isActiveScale = activeScaleId === scaleId;
 
@@ -72,6 +74,7 @@ export function useAudioPlayback({ scaleId }: UseAudioPlaybackParams): UseAudioP
     isPlaying: isActiveScale && isPlaying,
     isActiveScale,
     currentNoteIndex: isActiveScale ? currentNoteIndex : null,
+    currentNoteStep: isActiveScale ? currentNoteStep : null,
     playNote,
     togglePlayback,
   };

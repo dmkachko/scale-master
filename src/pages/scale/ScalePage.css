@@ -62,6 +62,16 @@
 
 .scale-page-right {
   min-height: 400px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scale-page-right::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 /* Pattern Selector */

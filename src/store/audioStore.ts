@@ -9,11 +9,13 @@ import { devtools } from 'zustand/middleware';
 interface AudioState {
   isPlaying: boolean;
   currentNoteIndex: number | null;
+  currentNoteStep: number | null; // Which scale degree (0-7) is playing
   activeScaleId: string | null;
 
   // Actions
   setPlaying: (isPlaying: boolean, scaleId?: string) => void;
   setCurrentNoteIndex: (index: number | null) => void;
+  setCurrentNote: (index: number | null, step: number | null) => void;
   stopAll: () => void;
 }
 
@@ -23,6 +25,7 @@ export const useAudioStore = create<AudioState>()(
       // Initial state
       isPlaying: false,
       currentNoteIndex: null,
+      currentNoteStep: null,
       activeScaleId: null,
 
       // Actions
@@ -40,9 +43,16 @@ export const useAudioStore = create<AudioState>()(
           'audio/setCurrentNoteIndex'
         ),
 
+      setCurrentNote: (index, step) =>
+        set(
+          { currentNoteIndex: index, currentNoteStep: step },
+          false,
+          'audio/setCurrentNote'
+        ),
+
       stopAll: () =>
         set(
-          { isPlaying: false, currentNoteIndex: null, activeScaleId: null },
+          { isPlaying: false, currentNoteIndex: null, currentNoteStep: null, activeScaleId: null },
           false,
           'audio/stopAll'
         ),

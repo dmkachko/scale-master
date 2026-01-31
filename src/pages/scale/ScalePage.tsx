@@ -10,6 +10,9 @@ import { useCatalogInit } from '../../hooks/useCatalogInit.ts';
 import RouteGuard from '../../components/RouteGuard.tsx';
 import NotFoundPage from '../errors/NotFoundPage.tsx';
 import ScaleCard from '../../components/ScaleCard.tsx';
+import TriadsSection from './TriadsSection.tsx';
+import RelativesSection from './RelativesSection.tsx';
+import { calculateScaleNotes } from '../../music/notes.ts';
 import { patterns, type ScalePattern } from '../../services/scalePatterns.ts';
 import './ScalePage.css';
 
@@ -17,10 +20,13 @@ function ScalePage() {
   useCatalogInit();
   const { scaleId } = useParams<{ scaleId: string }>();
   const { catalog, selectedRoot } = useCatalogStore();
-  const { playbackPattern, setPlaybackPattern } = usePreferencesStore();
+  const { playbackPattern, setPlaybackPattern, accidentalPreference } = usePreferencesStore();
 
   // Find the scale by ID
   const scale = catalog?.scaleTypes.find((s) => s.id === scaleId);
+
+  // Calculate scale notes for triads
+  const scaleNotes = scale ? calculateScaleNotes(selectedRoot, scale.intervals, accidentalPreference === 'sharps') : [];
 
   return (
     <RouteGuard
@@ -51,17 +57,13 @@ function ScalePage() {
             </div>
 
             <div className="scale-page-right">
-              <div className="additional-info-placeholder">
-                <h3>Additional Information</h3>
-                <p>This section will contain:</p>
-                <ul>
-                  <li>Chord progressions</li>
-                  <li>Common usage patterns</li>
-                  <li>Related scales</li>
-                  <li>Musical examples</li>
-                  <li>Practice exercises</li>
-                </ul>
-              </div>
+              <TriadsSection scaleNotes={scaleNotes} scaleIntervals={scale.intervals} />
+              <RelativesSection
+                currentScale={scale}
+                allScales={catalog?.scaleTypes || []}
+                rootNote={selectedRoot}
+                preferSharps={accidentalPreference === 'sharps'}
+              />
             </div>
           </div>
         </div>

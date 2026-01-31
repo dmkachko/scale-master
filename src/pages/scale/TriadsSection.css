@@ -1,0 +1,169 @@
+/**
+ * Triads Section Styles
+ */
+
+.triads-section {
+  background: var(--color-bg-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.triads-section h3 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.5rem;
+  color: var(--color-text-primary);
+}
+
+.triads-description {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.triads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.triad-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  transition: all var(--transition-base);
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.triad-card:hover {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.triad-card.playing {
+  border-color: var(--color-brand-primary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-primary) 0%,
+    rgba(168, 85, 247, 0.1) 100%
+  );
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+}
+
+.triad-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.triad-degree {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--color-brand-primary);
+  min-width: 40px;
+  text-align: center;
+}
+
+.triad-name {
+  flex: 1;
+}
+
+.triad-abbreviation {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.triad-full-name {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.triad-notes {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-sm);
+  justify-content: center;
+}
+
+.triad-note {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-success);
+  border-radius: var(--border-radius-sm);
+  min-width: 32px;
+  text-align: center;
+}
+
+.triad-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xs);
+  margin-left: auto;
+}
+
+.triad-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-brand-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.triad-button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.triad-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.triad-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.triad-button .button-icon {
+  font-size: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .triads-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .triad-card {
+    padding: var(--spacing-sm);
+  }
+
+  .triad-degree {
+    font-size: 1.1rem;
+    min-width: 35px;
+  }
+
+  .triad-abbreviation {
+    font-size: 1rem;
+  }
+
+  .triad-full-name {
+    font-size: 0.8rem;
+  }
+}

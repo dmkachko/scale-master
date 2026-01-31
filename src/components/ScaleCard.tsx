@@ -34,7 +34,7 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
   // Use provided pattern or fall back to store preference
   const activePattern = pattern || storePattern;
 
-  const { isPlaying, currentNoteIndex, playNote, togglePlayback } = useAudioPlayback({
+  const { isPlaying, currentNoteStep, playNote, togglePlayback } = useAudioPlayback({
     scaleId: scale.id,
   });
 
@@ -125,8 +125,8 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
 
         <div className="note-row notes-row">
           {notes.map((note, idx) => {
-            // Highlight first note when playing octave higher tonic (last note in sequence)
-            const isCurrentNote = currentNoteIndex === idx || (currentNoteIndex === notes.length && idx === 0);
+            // Highlight the note that's currently being played
+            const isCurrentNote = currentNoteStep === idx;
 
             return (
               <div
