@@ -22,20 +22,23 @@ export function analyzeScaleCharacteristics(intervals: number[]): string[] {
   }
 
   // Check for 5th (natural/diminished/augmented)
+  // Priority: NAT (7 semitones) > Alt (6 & 8) > Dim (6) > Aug (8)
   const hasDim5th = intervals.includes(6);
   const hasNat5th = intervals.includes(7);
   const hasAug5th = intervals.includes(8);
 
-  const fifthCount = (hasDim5th ? 1 : 0) + (hasNat5th ? 1 : 0) + (hasAug5th ? 1 : 0);
-
-  if (fifthCount > 1) {
+  if (hasNat5th) {
+    // If scale contains perfect 5th (7 semitones), always NAT
+    characteristics.push('nat');
+  } else if (hasDim5th && hasAug5th) {
+    // If no perfect 5th but has both dim (6) and aug (8), then Alt
     characteristics.push('alt');
   } else if (hasDim5th) {
+    // If no perfect 5th but has dim (6), then Dim
     characteristics.push('dim');
   } else if (hasAug5th) {
+    // If no perfect 5th but has aug (8), then Aug
     characteristics.push('aug');
-  } else if (hasNat5th) {
-    characteristics.push('nat');
   }
 
   // Check for 7th/maj7/6 (highest note characteristics)

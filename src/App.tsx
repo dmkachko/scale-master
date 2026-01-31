@@ -5,11 +5,11 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import ScaleCatalogPage from './pages/ScaleCatalogPage';
-import ScaleFinderPage from './pages/ScaleFinderPage';
-import ScaleDetailsPage from './pages/ScaleDetailsPage';
-import ScalePage from './pages/ScalePage';
-import NotFoundPage from './pages/NotFoundPage';
+import ScaleCatalogPage from './pages/scale-catalog/ScaleCatalogPage.tsx';
+import ScaleFinderPage from './pages/finder/ScaleFinderPage.tsx';
+import ScaleDetailsPage from './pages/scale-details/ScaleDetailsPage.tsx';
+import ScalePage from './pages/scale/ScalePage.tsx';
+import NotFoundPage from './pages/errors/NotFoundPage.tsx';
 import './App.css';
 
 function App() {

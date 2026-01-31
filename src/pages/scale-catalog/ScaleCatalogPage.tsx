@@ -4,11 +4,11 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { useCatalogStore } from '../store/catalogStore';
-import { usePreferencesStore } from '../store/preferencesStore';
-import { useCatalogInit } from '../hooks/useCatalogInit';
-import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../music/notes';
-import ScaleCard from '../components/ScaleCard';
+import { useCatalogStore } from '../../store/catalogStore.ts';
+import { usePreferencesStore } from '../../store/preferencesStore.ts';
+import { useCatalogInit } from '../../hooks/useCatalogInit.ts';
+import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../../music/notes.ts';
+import ScaleCard from '../../components/ScaleCard.tsx';
 import './ScaleCatalogPage.css';
 
 function ScaleCatalogPage() {

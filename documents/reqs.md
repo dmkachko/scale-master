@@ -23,11 +23,9 @@ The application is intended for **musicians, composers, and theorists** who want
 - Offline-capable operation (no backend required)
 
 ### Out of Scope
-- Audio playback or MIDI generation
 - AI-based recommendations
 - User accounts or persistence beyond local preferences
 - Harmonic analysis beyond scale and triad level
-- Rhythm, meter, or temporal concepts
 
 ---
 

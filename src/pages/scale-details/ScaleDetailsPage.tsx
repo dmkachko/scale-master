@@ -4,8 +4,8 @@
  * Placeholder for future implementation
  */
 
-import { useCatalogInit } from '../hooks/useCatalogInit';
-import './PlaceholderPage.css';
+import { useCatalogInit } from '../../hooks/useCatalogInit.ts';
+import '../errors/PlaceholderPage.css';
 
 function ScaleDetailsPage() {
   useCatalogInit();
