@@ -1,0 +1,71 @@
+/**
+ * Placeholder Page Styles
+ * Used for pages under development
+ */
+
+.placeholder-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--spacing-2xl);
+}
+
+.placeholder-content {
+  max-width: var(--content-max-width);
+  text-align: center;
+  padding: var(--spacing-3xl);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+}
+
+.placeholder-content h2 {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-text-primary);
+}
+
+.placeholder-description {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.placeholder-features {
+  text-align: left;
+  margin: var(--spacing-2xl) auto;
+  max-width: 400px;
+  padding: var(--spacing-xl);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+}
+
+.placeholder-features h3 {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-lg);
+}
+
+.placeholder-features ul {
+  margin: 0;
+  padding-left: var(--spacing-xl);
+  color: var(--color-text-secondary);
+}
+
+.placeholder-features li {
+  margin-bottom: var(--spacing-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.placeholder-note {
+  margin-top: var(--spacing-2xl);
+  padding: var(--spacing-md);
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.placeholder-note strong {
+  color: var(--color-info-light);
+}

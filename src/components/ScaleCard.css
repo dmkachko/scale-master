@@ -1,0 +1,106 @@
+/**
+ * Scale Card Component Styles
+ */
+
+.scale-card {
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  text-align: center;
+  transition: all var(--transition-base);
+}
+
+.scale-card:hover {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-brand-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-brand);
+}
+
+.scale-card h3 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-text-primary);
+}
+
+/* Tags */
+.scale-card .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+  min-height: var(--spacing-xl);
+}
+
+.scale-card .tag {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  font-weight: var(--font-weight-semibold);
+}
+
+.scale-card .family-tag {
+  background-color: var(--color-info-bg);
+  color: var(--color-info-light);
+}
+
+.scale-card .char-tag {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-light);
+}
+
+/* Note Grid */
+.scale-card .note-grid {
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+}
+
+.scale-card .note-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--spacing-sm);
+}
+
+.scale-card .intervals-row {
+  margin-bottom: var(--spacing-sm);
+}
+
+.scale-card .notes-row {
+  margin-bottom: var(--spacing-sm);
+}
+
+.scale-card .note-cell {
+  text-align: center;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  border-radius: var(--radius-sm);
+}
+
+.scale-card .interval-cell {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+}
+
+.scale-card .note-name-cell {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.scale-card .degree-cell {
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-style: italic;
+}

@@ -1,0 +1,94 @@
+{
+  "scaleTypes": [
+    {
+      "id": "major",
+      "name": "Major",
+      "family": "diatonic",
+      "intervals": [0, 2, 4, 5, 7, 9, 11]
+    },
+    {
+      "id": "natural-minor",
+      "name": "Natural Minor",
+      "family": "diatonic",
+      "intervals": [0, 2, 3, 5, 7, 8, 10]
+    },
+    {
+      "id": "harmonic-minor",
+      "name": "Harmonic Minor",
+      "family": "minor",
+      "intervals": [0, 2, 3, 5, 7, 8, 11]
+    },
+    {
+      "id": "melodic-minor",
+      "name": "Melodic Minor",
+      "family": "minor",
+      "intervals": [0, 2, 3, 5, 7, 9, 11]
+    },
+    {
+      "id": "dorian",
+      "name": "Dorian",
+      "family": "diatonic",
+      "intervals": [0, 2, 3, 5, 7, 9, 10]
+    },
+    {
+      "id": "phrygian",
+      "name": "Phrygian",
+      "family": "diatonic",
+      "intervals": [0, 1, 3, 5, 7, 8, 10]
+    },
+    {
+      "id": "lydian",
+      "name": "Lydian",
+      "family": "diatonic",
+      "intervals": [0, 2, 4, 6, 7, 9, 11]
+    },
+    {
+      "id": "mixolydian",
+      "name": "Mixolydian",
+      "family": "diatonic",
+      "intervals": [0, 2, 4, 5, 7, 9, 10]
+    },
+    {
+      "id": "locrian",
+      "name": "Locrian",
+      "family": "diatonic",
+      "intervals": [0, 1, 3, 5, 6, 8, 10]
+    },
+    {
+      "id": "major-pentatonic",
+      "name": "Major Pentatonic",
+      "family": "pentatonic",
+      "intervals": [0, 2, 4, 7, 9]
+    },
+    {
+      "id": "minor-pentatonic",
+      "name": "Minor Pentatonic",
+      "family": "pentatonic",
+      "intervals": [0, 3, 5, 7, 10]
+    },
+    {
+      "id": "blues",
+      "name": "Blues",
+      "family": "blues",
+      "intervals": [0, 3, 5, 6, 7, 10]
+    },
+    {
+      "id": "whole-tone",
+      "name": "Whole Tone",
+      "family": "symmetrical",
+      "intervals": [0, 2, 4, 6, 8, 10]
+    },
+    {
+      "id": "diminished",
+      "name": "Diminished (Half-Whole)",
+      "family": "symmetrical",
+      "intervals": [0, 1, 3, 4, 6, 7, 9, 10]
+    },
+    {
+      "id": "augmented",
+      "name": "Augmented",
+      "family": "symmetrical",
+      "intervals": [0, 3, 4, 7, 8, 11]
+    }
+  ]
+}
