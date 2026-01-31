@@ -10,14 +10,7 @@
 ## US-01 — Load the scale catalog from a local JSON file
 **As a user**, I want the app to load a built-in catalog of scale types so that all features operate on a known dataset.
 
-### Test cases
-1. **Catalog loads on app start**
-    - Given the app is opened
-    - When the app initializes
-    - Then the catalog is loaded successfully and the app shows “catalog ready” state (implicit: no error banner)
-2. **Catalog schema minimum**
-    - Given the catalog contains at least one scale type
-    - Then each scale type has `id`, `name`, and `intervals` (intervals include 0)
+> **Note**: Test cases for US-01 are documented in [US-01-test-cases.md](./US-01-test-cases.md)
 
 ---
 
