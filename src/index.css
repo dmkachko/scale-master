@@ -4,6 +4,7 @@
  */
 
 @import './styles/tokens.css';
+@import './styles/utilities.css';
 
 :root {
   font-family: var(--font-sans);
