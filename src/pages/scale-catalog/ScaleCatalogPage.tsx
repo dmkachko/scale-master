@@ -154,6 +154,7 @@ function ScaleCatalogPage() {
               rootNote={selectedRoot}
               highlighted={highlightedScaleId === scale.id}
               onNavigate={handleNavigate}
+              pattern="alternating"
             />
           ))}
         </div>

@@ -65,6 +65,53 @@
   color: var(--color-text-primary);
 }
 
+/* Audio Controls */
+.scale-card-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.play-all-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.play-all-button:hover {
+  background-color: var(--color-brand-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.play-all-button:active {
+  transform: translateY(0);
+}
+
+.play-all-button.playing {
+  background-color: var(--color-error-bg);
+}
+
+.play-all-button.playing:hover {
+  background-color: var(--color-error-text);
+}
+
+.play-icon {
+  display: inline-block;
+  font-size: var(--font-size-base);
+}
+
 /* Tags */
 .scale-card .tags {
   display: flex;
@@ -145,6 +192,54 @@
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-wide);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  transition: all var(--transition-base);
+}
+
+.scale-card .note-name-cell.playing {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-primary);
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+}
+
+.note-play-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  padding: 0;
+  color: inherit;
+}
+
+.note-play-button:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+}
+
+.note-play-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.play-icon-small {
+  font-size: 8px;
+  display: inline-block;
+  margin-left: 1px;
+}
+
+.note-name {
+  display: inline-block;
 }
 
 .scale-card .degree-cell {

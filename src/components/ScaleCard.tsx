@@ -9,7 +9,9 @@ import { analyzeScaleCharacteristics } from '../music/characteristics';
 import { intervalsToRomanNumerals } from '../music/degrees';
 import { usePreferencesStore } from '../store/preferencesStore';
 import { useCatalogStore } from '../store/catalogStore';
+import { useAudioPlayback } from '../hooks/useAudioPlayback';
 import type { ScaleType } from '../types/catalog';
+import type { ScalePattern } from '../services/scalePatterns';
 import './ScaleCard.css';
 
 interface ScaleCardProps {
@@ -18,16 +20,37 @@ interface ScaleCardProps {
   highlighted?: boolean;
   onNavigate?: (scaleId: string) => void;
   showMoreLink?: boolean;
+  pattern?: ScalePattern; // Optional pattern override (defaults to store preference)
 }
 
-function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreLink = true }: ScaleCardProps) {
+function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreLink = true, pattern }: ScaleCardProps) {
   const accidentalPreference = usePreferencesStore((state) => state.accidentalPreference);
+  const timeSignature = usePreferencesStore((state) => state.timeSignature);
+  const tempo = usePreferencesStore((state) => state.tempo);
+  const storePattern = usePreferencesStore((state) => state.playbackPattern);
   const preferSharps = accidentalPreference === 'sharps';
   const catalog = useCatalogStore((state) => state.catalog);
+
+  // Use provided pattern or fall back to store preference
+  const activePattern = pattern || storePattern;
+
+  const { isPlaying, currentNoteIndex, playNote, togglePlayback } = useAudioPlayback({
+    scaleId: scale.id,
+  });
 
   const notes = calculateScaleNotes(rootNote, scale.intervals, preferSharps);
   const characteristics = analyzeScaleCharacteristics(scale.intervals);
   const romanNumerals = intervalsToRomanNumerals(scale.intervals);
+
+  const handlePlayNote = async (note: string) => {
+    if (!isPlaying) {
+      await playNote(note);
+    }
+  };
+
+  const handlePlayAll = async () => {
+    await togglePlayback(notes, timeSignature, tempo, activePattern);
+  };
 
   // Get parent scale name if this is a mode
   const parentScale = scale.modeOf
@@ -73,6 +96,24 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
         ))}
       </div>
 
+      <div className="scale-card-controls">
+        <button
+          onClick={handlePlayAll}
+          className={`play-all-button ${isPlaying ? 'playing' : ''}`}
+          aria-label={isPlaying ? 'Stop playback' : 'Play all scale steps'}
+        >
+          {isPlaying ? (
+            <>
+              <span className="play-icon">⏹</span> Stop
+            </>
+          ) : (
+            <>
+              <span className="play-icon">▶</span> Play All
+            </>
+          )}
+        </button>
+      </div>
+
       <div className="note-grid">
         <div className="note-row intervals-row">
           {scale.intervals.map((interval, idx) => (
@@ -83,11 +124,27 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
         </div>
 
         <div className="note-row notes-row">
-          {notes.map((note, idx) => (
-            <div key={idx} className="note-cell note-name-cell">
-              {note}
-            </div>
-          ))}
+          {notes.map((note, idx) => {
+            // Highlight first note when playing octave higher tonic (last note in sequence)
+            const isCurrentNote = currentNoteIndex === idx || (currentNoteIndex === notes.length && idx === 0);
+
+            return (
+              <div
+                key={idx}
+                className={`note-cell note-name-cell ${isCurrentNote ? 'playing' : ''}`}
+              >
+                <button
+                  onClick={() => handlePlayNote(note)}
+                  className="note-play-button"
+                  aria-label={`Play ${note}`}
+                  disabled={isPlaying}
+                >
+                  <span className="play-icon-small">▶</span>
+                </button>
+                <span className="note-name">{note}</span>
+              </div>
+            );
+          })}
         </div>
 
         <div className="note-row degrees-row">
