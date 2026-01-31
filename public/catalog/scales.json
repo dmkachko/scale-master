@@ -4,91 +4,1096 @@
       "id": "major",
       "name": "Major",
       "family": "diatonic",
-      "intervals": [0, 2, 4, 5, 7, 9, 11]
+      "intervals": [
+        0,
+        2,
+        4,
+        5,
+        7,
+        9,
+        11
+      ],
+      "steps": [
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "modeOf": {
+        "id": "natural-minor",
+        "step": 3
+      },
+      "inversions": {
+        "2": "dorian",
+        "3": "phrygian",
+        "4": "lydian",
+        "5": "mixolydian",
+        "6": "natural-minor",
+        "7": "locrian"
+      }
     },
     {
       "id": "natural-minor",
       "name": "Natural Minor",
       "family": "diatonic",
-      "intervals": [0, 2, 3, 5, 7, 8, 10]
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        8,
+        10
+      ],
+      "steps": [
+        2,
+        1,
+        2,
+        2,
+        1,
+        2,
+        2
+      ],
+      "modeOf": {
+        "id": "major",
+        "step": 6
+      },
+      "inversions": {
+        "2": "locrian",
+        "3": "major",
+        "4": "dorian",
+        "5": "phrygian",
+        "6": "lydian",
+        "7": "mixolydian"
+      }
     },
     {
       "id": "harmonic-minor",
       "name": "Harmonic Minor",
       "family": "minor",
-      "intervals": [0, 2, 3, 5, 7, 8, 11]
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        8,
+        11
+      ],
+      "steps": [
+        2,
+        1,
+        2,
+        2,
+        1,
+        3,
+        1
+      ],
+      "modeOf": null,
+      "inversions": {
+        "2": "locrian-natural-6",
+        "3": "ionian-augmented",
+        "4": "dorian-sharp4",
+        "5": "phrygian-dominant",
+        "6": "lydian-sharp2",
+        "7": "super-locrian-double-flat7"
+      }
     },
     {
       "id": "melodic-minor",
       "name": "Melodic Minor",
       "family": "minor",
-      "intervals": [0, 2, 3, 5, 7, 9, 11]
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        9,
+        11
+      ],
+      "steps": [
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1
+      ],
+      "modeOf": {
+        "id": "lydian-augmented",
+        "step": 6
+      },
+      "inversions": {
+        "2": "phrygian-natural-6",
+        "3": "lydian-augmented",
+        "4": "lydian-dominant",
+        "5": "aeolian-dominant",
+        "6": "locrian-natural-2",
+        "7": "superlocrian"
+      }
     },
     {
       "id": "dorian",
       "name": "Dorian",
       "family": "diatonic",
-      "intervals": [0, 2, 3, 5, 7, 9, 10]
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        9,
+        10
+      ],
+      "steps": [
+        2,
+        1,
+        2,
+        2,
+        2,
+        1,
+        2
+      ],
+      "modeOf": {
+        "id": "major",
+        "step": 2
+      },
+      "inversions": {
+        "2": "phrygian",
+        "3": "lydian",
+        "4": "mixolydian",
+        "5": "natural-minor",
+        "6": "locrian",
+        "7": "major"
+      }
     },
     {
       "id": "phrygian",
       "name": "Phrygian",
       "family": "diatonic",
-      "intervals": [0, 1, 3, 5, 7, 8, 10]
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        7,
+        8,
+        10
+      ],
+      "steps": [
+        1,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2
+      ],
+      "modeOf": {
+        "id": "major",
+        "step": 3
+      },
+      "inversions": {
+        "2": "lydian",
+        "3": "mixolydian",
+        "4": "natural-minor",
+        "5": "locrian",
+        "6": "major",
+        "7": "dorian"
+      }
     },
     {
       "id": "lydian",
       "name": "Lydian",
       "family": "diatonic",
-      "intervals": [0, 2, 4, 6, 7, 9, 11]
+      "intervals": [
+        0,
+        2,
+        4,
+        6,
+        7,
+        9,
+        11
+      ],
+      "steps": [
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        1
+      ],
+      "modeOf": {
+        "id": "major",
+        "step": 4
+      },
+      "inversions": {
+        "2": "mixolydian",
+        "3": "natural-minor",
+        "4": "locrian",
+        "5": "major",
+        "6": "dorian",
+        "7": "phrygian"
+      }
     },
     {
       "id": "mixolydian",
       "name": "Mixolydian",
       "family": "diatonic",
-      "intervals": [0, 2, 4, 5, 7, 9, 10]
+      "intervals": [
+        0,
+        2,
+        4,
+        5,
+        7,
+        9,
+        10
+      ],
+      "steps": [
+        2,
+        2,
+        1,
+        2,
+        2,
+        1,
+        2
+      ],
+      "modeOf": {
+        "id": "major",
+        "step": 5
+      },
+      "inversions": {
+        "2": "natural-minor",
+        "3": "locrian",
+        "4": "major",
+        "5": "dorian",
+        "6": "phrygian",
+        "7": "lydian"
+      }
     },
     {
       "id": "locrian",
       "name": "Locrian",
       "family": "diatonic",
-      "intervals": [0, 1, 3, 5, 6, 8, 10]
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        10
+      ],
+      "steps": [
+        1,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2
+      ],
+      "modeOf": {
+        "id": "major",
+        "step": 7
+      },
+      "inversions": {
+        "2": "major",
+        "3": "dorian",
+        "4": "phrygian",
+        "5": "lydian",
+        "6": "mixolydian",
+        "7": "natural-minor"
+      }
     },
     {
       "id": "major-pentatonic",
       "name": "Major Pentatonic",
       "family": "pentatonic",
-      "intervals": [0, 2, 4, 7, 9]
+      "intervals": [
+        0,
+        2,
+        4,
+        7,
+        9
+      ],
+      "steps": [
+        2,
+        2,
+        3,
+        2,
+        3
+      ],
+      "modeOf": {
+        "id": "minor-pentatonic",
+        "step": 2
+      },
+      "inversions": {
+        "5": "minor-pentatonic"
+      }
     },
     {
       "id": "minor-pentatonic",
       "name": "Minor Pentatonic",
       "family": "pentatonic",
-      "intervals": [0, 3, 5, 7, 10]
+      "intervals": [
+        0,
+        3,
+        5,
+        7,
+        10
+      ],
+      "steps": [
+        3,
+        2,
+        2,
+        3,
+        2
+      ],
+      "modeOf": {
+        "id": "major-pentatonic",
+        "step": 5
+      },
+      "inversions": {
+        "2": "major-pentatonic"
+      }
     },
     {
       "id": "blues",
       "name": "Blues",
       "family": "blues",
-      "intervals": [0, 3, 5, 6, 7, 10]
+      "intervals": [
+        0,
+        3,
+        5,
+        6,
+        7,
+        10
+      ],
+      "steps": [
+        3,
+        2,
+        1,
+        1,
+        3,
+        2
+      ],
+      "modeOf": null,
+      "inversions": {}
     },
     {
       "id": "whole-tone",
       "name": "Whole Tone",
       "family": "symmetrical",
-      "intervals": [0, 2, 4, 6, 8, 10]
+      "intervals": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10
+      ],
+      "steps": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "modeOf": null,
+      "inversions": {}
     },
     {
       "id": "diminished",
       "name": "Diminished (Half-Whole)",
       "family": "symmetrical",
-      "intervals": [0, 1, 3, 4, 6, 7, 9, 10]
+      "intervals": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        7,
+        9,
+        10
+      ],
+      "steps": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        2
+      ],
+      "modeOf": {
+        "id": "octatonic-whole-half",
+        "step": 2
+      },
+      "inversions": {
+        "2": "octatonic-whole-half",
+        "4": "octatonic-whole-half",
+        "6": "octatonic-whole-half",
+        "8": "octatonic-whole-half"
+      }
     },
     {
       "id": "augmented",
       "name": "Augmented",
       "family": "symmetrical",
-      "intervals": [0, 3, 4, 7, 8, 11]
+      "intervals": [
+        0,
+        3,
+        4,
+        7,
+        8,
+        11
+      ],
+      "steps": [
+        3,
+        1,
+        3,
+        1,
+        3,
+        1
+      ],
+      "modeOf": null,
+      "inversions": {}
+    },
+    {
+      "id": "lydian-augmented",
+      "name": "Lydian Augmented",
+      "family": "melodic-minor-modes",
+      "intervals": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        9,
+        11
+      ],
+      "steps": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        1
+      ],
+      "alternativeNames": [
+        "Lydian #5"
+      ],
+      "modeOf": {
+        "id": "melodic-minor",
+        "step": 3
+      },
+      "inversions": {
+        "2": "lydian-dominant",
+        "3": "aeolian-dominant",
+        "4": "locrian-natural-2",
+        "5": "superlocrian",
+        "6": "melodic-minor",
+        "7": "phrygian-natural-6"
+      }
+    },
+    {
+      "id": "lydian-dominant",
+      "name": "Lydian Dominant",
+      "family": "melodic-minor-modes",
+      "intervals": [
+        0,
+        2,
+        4,
+        6,
+        7,
+        9,
+        10
+      ],
+      "steps": [
+        2,
+        2,
+        2,
+        1,
+        2,
+        1,
+        2
+      ],
+      "alternativeNames": [
+        "Acoustic Scale",
+        "Overtone Scale",
+        "Bartók Scale",
+        "Lydian b7",
+        "Mixolydian #4"
+      ],
+      "modeOf": {
+        "id": "melodic-minor",
+        "step": 4
+      },
+      "inversions": {
+        "2": "aeolian-dominant",
+        "3": "locrian-natural-2",
+        "4": "superlocrian",
+        "5": "melodic-minor",
+        "6": "phrygian-natural-6",
+        "7": "lydian-augmented"
+      }
+    },
+    {
+      "id": "aeolian-dominant",
+      "name": "Aeolian Dominant",
+      "family": "melodic-minor-modes",
+      "intervals": [
+        0,
+        2,
+        4,
+        5,
+        7,
+        8,
+        10
+      ],
+      "steps": [
+        2,
+        2,
+        1,
+        2,
+        1,
+        2,
+        2
+      ],
+      "alternativeNames": [
+        "Mixolydian b6",
+        "Hindu Scale",
+        "Melodic Major",
+        "Mixolydian b13"
+      ],
+      "modeOf": {
+        "id": "melodic-minor",
+        "step": 5
+      },
+      "inversions": {
+        "2": "locrian-natural-2",
+        "3": "superlocrian",
+        "4": "melodic-minor",
+        "5": "phrygian-natural-6",
+        "6": "lydian-augmented",
+        "7": "lydian-dominant"
+      }
+    },
+    {
+      "id": "locrian-natural-2",
+      "name": "Locrian Natural 2",
+      "family": "melodic-minor-modes",
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        6,
+        8,
+        10
+      ],
+      "steps": [
+        2,
+        1,
+        2,
+        1,
+        2,
+        2,
+        2
+      ],
+      "alternativeNames": [
+        "Locrian ♮2",
+        "Half-Diminished"
+      ],
+      "modeOf": {
+        "id": "melodic-minor",
+        "step": 6
+      },
+      "inversions": {
+        "2": "superlocrian",
+        "3": "melodic-minor",
+        "4": "phrygian-natural-6",
+        "5": "lydian-augmented",
+        "6": "lydian-dominant",
+        "7": "aeolian-dominant"
+      }
+    },
+    {
+      "id": "octatonic-whole-half",
+      "name": "Octatonic (Whole-Half)",
+      "family": "symmetrical",
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        6,
+        8,
+        9,
+        11
+      ],
+      "steps": [
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1
+      ],
+      "alternativeNames": [
+        "Diminished Scale",
+        "Whole-Half Diminished"
+      ],
+      "modeOf": {
+        "id": "diminished",
+        "step": 2
+      },
+      "inversions": {
+        "2": "diminished",
+        "4": "diminished",
+        "6": "diminished",
+        "8": "diminished"
+      }
+    },
+    {
+      "id": "neapolitan-major",
+      "name": "Neapolitan Major",
+      "family": "other",
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        7,
+        9,
+        11
+      ],
+      "steps": [
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1
+      ],
+      "modeOf": null,
+      "inversions": {}
+    },
+    {
+      "id": "phrygian-natural-6",
+      "name": "Phrygian Natural 6",
+      "family": "other",
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        7,
+        9,
+        10
+      ],
+      "steps": [
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2
+      ],
+      "alternativeNames": [
+        "Phrygian ♮6",
+        "Dorian b2"
+      ],
+      "modeOf": {
+        "id": "melodic-minor",
+        "step": 2
+      },
+      "inversions": {
+        "2": "lydian-augmented",
+        "3": "lydian-dominant",
+        "4": "aeolian-dominant",
+        "5": "locrian-natural-2",
+        "6": "superlocrian",
+        "7": "melodic-minor"
+      }
+    },
+    {
+      "id": "half-diminished-bebop",
+      "name": "Half-Diminished Bebop",
+      "family": "bebop",
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        11
+      ],
+      "steps": [
+        1,
+        2,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1
+      ],
+      "alternativeNames": [
+        "Bebop Half-Diminished"
+      ],
+      "modeOf": null,
+      "inversions": {}
+    },
+    {
+      "id": "superlocrian",
+      "name": "Superlocrian",
+      "family": "melodic-minor-modes",
+      "intervals": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        8,
+        10
+      ],
+      "steps": [
+        1,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2
+      ],
+      "alternativeNames": [
+        "Altered Scale",
+        "Diminished Whole Tone",
+        "Super Locrian",
+        "Locrian b4"
+      ],
+      "modeOf": {
+        "id": "melodic-minor",
+        "step": 7
+      },
+      "inversions": {
+        "2": "melodic-minor",
+        "3": "phrygian-natural-6",
+        "4": "lydian-augmented",
+        "5": "lydian-dominant",
+        "6": "aeolian-dominant",
+        "7": "locrian-natural-2"
+      }
+    },
+    {
+      "id": "van-der-horst-octatonic",
+      "name": "Van der Horst Octatonic",
+      "family": "symmetrical",
+      "intervals": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        8,
+        9,
+        11
+      ],
+      "steps": [
+        1,
+        2,
+        1,
+        2,
+        2,
+        1,
+        2,
+        1
+      ],
+      "alternativeNames": [
+        "Messiaen Mode 6 Rotation 3",
+        "Kaptyllic"
+      ],
+      "modeOf": null,
+      "inversions": {}
+    },
+    {
+      "id": "tcherepnin-octatonic-mode-i",
+      "name": "Tcherepnin Octatonic Mode I",
+      "family": "symmetrical",
+      "intervals": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        7,
+        9,
+        11
+      ],
+      "steps": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        2,
+        1
+      ],
+      "modeOf": null,
+      "inversions": {}
+    },
+    {
+      "id": "locrian-natural-6",
+      "name": "Locrian Natural 6",
+      "family": "harmonic-minor-modes",
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        9,
+        10
+      ],
+      "steps": [
+        1,
+        2,
+        2,
+        1,
+        3,
+        1,
+        2
+      ],
+      "alternativeNames": [
+        "Locrian #6",
+        "Locrian 13"
+      ],
+      "modeOf": {
+        "id": "harmonic-minor",
+        "step": 2
+      },
+      "inversions": {
+        "2": "ionian-augmented",
+        "3": "dorian-sharp4",
+        "4": "phrygian-dominant",
+        "5": "lydian-sharp2",
+        "6": "super-locrian-double-flat7",
+        "7": "harmonic-minor"
+      }
+    },
+    {
+      "id": "ionian-augmented",
+      "name": "Ionian Augmented",
+      "family": "harmonic-minor-modes",
+      "intervals": [
+        0,
+        2,
+        4,
+        5,
+        8,
+        9,
+        11
+      ],
+      "steps": [
+        2,
+        2,
+        1,
+        3,
+        1,
+        2,
+        1
+      ],
+      "alternativeNames": [
+        "Ionian #5"
+      ],
+      "modeOf": {
+        "id": "harmonic-minor",
+        "step": 3
+      },
+      "inversions": {
+        "2": "dorian-sharp4",
+        "3": "phrygian-dominant",
+        "4": "lydian-sharp2",
+        "5": "super-locrian-double-flat7",
+        "6": "harmonic-minor",
+        "7": "locrian-natural-6"
+      }
+    },
+    {
+      "id": "dorian-sharp4",
+      "name": "Dorian #4",
+      "family": "harmonic-minor-modes",
+      "intervals": [
+        0,
+        2,
+        3,
+        6,
+        7,
+        9,
+        10
+      ],
+      "steps": [
+        2,
+        1,
+        3,
+        1,
+        2,
+        1,
+        2
+      ],
+      "alternativeNames": [
+        "Ukrainian Dorian",
+        "Romanian Minor",
+        "Altered Dorian"
+      ],
+      "modeOf": {
+        "id": "harmonic-minor",
+        "step": 4
+      },
+      "inversions": {
+        "2": "phrygian-dominant",
+        "3": "lydian-sharp2",
+        "4": "super-locrian-double-flat7",
+        "5": "harmonic-minor",
+        "6": "locrian-natural-6",
+        "7": "ionian-augmented"
+      }
+    },
+    {
+      "id": "phrygian-dominant",
+      "name": "Phrygian Dominant",
+      "family": "harmonic-minor-modes",
+      "intervals": [
+        0,
+        1,
+        4,
+        5,
+        7,
+        8,
+        10
+      ],
+      "steps": [
+        1,
+        3,
+        1,
+        2,
+        1,
+        2,
+        2
+      ],
+      "alternativeNames": [
+        "Spanish Phrygian",
+        "Freygish",
+        "Hijaz",
+        "Altered Phrygian"
+      ],
+      "modeOf": {
+        "id": "harmonic-minor",
+        "step": 5
+      },
+      "inversions": {
+        "2": "lydian-sharp2",
+        "3": "super-locrian-double-flat7",
+        "4": "harmonic-minor",
+        "5": "locrian-natural-6",
+        "6": "ionian-augmented",
+        "7": "dorian-sharp4"
+      }
+    },
+    {
+      "id": "lydian-sharp2",
+      "name": "Lydian #2",
+      "family": "harmonic-minor-modes",
+      "intervals": [
+        0,
+        3,
+        4,
+        6,
+        7,
+        9,
+        11
+      ],
+      "steps": [
+        3,
+        1,
+        2,
+        1,
+        2,
+        2,
+        1
+      ],
+      "alternativeNames": [
+        "Lydian #9"
+      ],
+      "modeOf": {
+        "id": "harmonic-minor",
+        "step": 6
+      },
+      "inversions": {
+        "2": "super-locrian-double-flat7",
+        "3": "harmonic-minor",
+        "4": "locrian-natural-6",
+        "5": "ionian-augmented",
+        "6": "dorian-sharp4",
+        "7": "phrygian-dominant"
+      }
+    },
+    {
+      "id": "super-locrian-double-flat7",
+      "name": "Super Locrian bb7",
+      "family": "harmonic-minor-modes",
+      "intervals": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        8,
+        9
+      ],
+      "steps": [
+        1,
+        2,
+        1,
+        2,
+        2,
+        1,
+        3
+      ],
+      "alternativeNames": [
+        "Ultralocrian",
+        "Altered Diminished"
+      ],
+      "modeOf": {
+        "id": "harmonic-minor",
+        "step": 7
+      },
+      "inversions": {
+        "2": "harmonic-minor",
+        "3": "locrian-natural-6",
+        "4": "ionian-augmented",
+        "5": "dorian-sharp4",
+        "6": "phrygian-dominant",
+        "7": "lydian-sharp2"
+      }
     }
   ]
 }

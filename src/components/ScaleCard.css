@@ -9,6 +9,7 @@
   border: 1px solid var(--color-border-primary);
   text-align: center;
   transition: all var(--transition-base);
+  scroll-margin-top: var(--spacing-xl);
 }
 
 .scale-card:hover {
@@ -16,6 +17,25 @@
   border-color: var(--color-brand-primary);
   transform: translateY(-2px);
   box-shadow: var(--shadow-brand);
+}
+
+/* Highlighted state when targeted externally */
+.scale-card.highlighted {
+  border: 3px solid #d1d5db;
+  box-shadow: 0 0 0 4px rgba(209, 213, 219, 0.3);
+  animation: highlight-pulse 0.6s ease-out;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(209, 213, 219, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(209, 213, 219, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(209, 213, 219, 0.3);
+  }
 }
 
 .scale-card h3 {
@@ -103,4 +123,143 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   font-style: italic;
+}
+
+/* Alternative Names */
+.scale-card .alternative-names {
+  margin: var(--spacing-sm) 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+/* Scale Info Sections */
+.scale-card .scale-info-section {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.scale-card .info-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  margin-bottom: var(--spacing-xs);
+}
+
+.scale-card .info-value {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+/* Steps Display */
+.scale-card .steps-display {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.scale-card .step-badge {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+/* Mode Of Section */
+.scale-card .mode-of .info-value {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.scale-card .mode-link {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.scale-card .mode-link:hover {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.scale-card .mode-link:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+.scale-card .mode-link strong {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Inversions/Modes List */
+.scale-card .modes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.scale-card .mode-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.scale-card .mode-item:hover {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-brand-primary);
+  transform: translateX(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scale-card .mode-item:active {
+  transform: translateX(2px);
+}
+
+.scale-card .mode-item:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+.scale-card .mode-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-primary);
+  border-radius: 50%;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.scale-card .mode-name {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
 }

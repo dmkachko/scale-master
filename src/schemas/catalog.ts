@@ -5,8 +5,16 @@
 import { z } from 'zod';
 
 /**
+ * Schema for modal relationship
+ */
+export const ModeOfSchema = z.object({
+  id: z.string(),
+  step: z.number().int().min(1),
+});
+
+/**
  * Schema for a scale type
- * Validates id, name, family, and intervals
+ * Validates id, name, family, intervals, and modal relationships
  */
 export const ScaleTypeSchema = z.object({
   id: z.string().min(1, 'Scale type id is required'),
@@ -18,6 +26,10 @@ export const ScaleTypeSchema = z.object({
     .refine((intervals) => intervals.includes(0), {
       message: 'Intervals must include 0 (root)',
     }),
+  steps: z.array(z.number().int().min(1).max(11)).optional(),
+  alternativeNames: z.array(z.string()).optional(),
+  modeOf: ModeOfSchema.nullable().optional(),
+  inversions: z.record(z.string(), z.string()).optional(),
 });
 
 /**
