@@ -3,6 +3,7 @@
  * Displays a scale with its intervals, notes, degrees, and modal relationships
  */
 
+import { Link } from 'react-router-dom';
 import { calculateScaleNotes } from '../music/notes';
 import { analyzeScaleCharacteristics } from '../music/characteristics';
 import { intervalsToRomanNumerals } from '../music/degrees';
@@ -16,9 +17,10 @@ interface ScaleCardProps {
   rootNote: number;
   highlighted?: boolean;
   onNavigate?: (scaleId: string) => void;
+  showMoreLink?: boolean;
 }
 
-function ScaleCard({ scale, rootNote, highlighted = false, onNavigate }: ScaleCardProps) {
+function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreLink = true }: ScaleCardProps) {
   const accidentalPreference = usePreferencesStore((state) => state.accidentalPreference);
   const preferSharps = accidentalPreference === 'sharps';
   const catalog = useCatalogStore((state) => state.catalog);
@@ -40,20 +42,21 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate }: ScaleCa
       })
     : [];
 
-  const handleModeClick = (scaleId: string) => {
-    if (onNavigate) {
-      onNavigate(scaleId);
-    } else {
-      window.location.hash = scaleId;
-    }
-  };
+  // Mode navigation is handled by Link components now
 
   return (
     <div
       id={scale.id}
       className={`scale-card${highlighted ? ' highlighted' : ''}`}
     >
-      <h3>{scale.name}</h3>
+      <div className="scale-card-header">
+        <h3>{scale.name}</h3>
+        {showMoreLink && (
+          <Link to={`/scale/${scale.id}`} className="more-link">
+            More →
+          </Link>
+        )}
+      </div>
 
       {scale.alternativeNames && scale.alternativeNames.length > 0 && (
         <div className="alternative-names">
@@ -94,35 +97,25 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate }: ScaleCa
             </div>
           ))}
         </div>
-      </div>
 
-      {scale.steps && (
-        <div className="scale-info-section">
-          <div className="info-label">Interval Steps:</div>
-          <div className="info-value steps-display">
+        {scale.steps && (
+          <div className="note-row steps-row">
             {scale.steps.map((step, idx) => (
-              <span key={idx} className="step-badge">
-                {step === 1 ? 'H' : 'W'}
-              </span>
+              <div key={idx} className="note-cell step-cell">
+                {step === 1 ? 'H' : step === 2 ? 'W' : step === 3 ? 'W½' : step}
+              </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {parentScale && scale.modeOf && (
         <div className="scale-info-section mode-of">
           <div className="info-label">Mode of:</div>
           <div className="info-value">
-            <a
-              href={`#${scale.modeOf.id}`}
-              className="mode-link"
-              onClick={(e) => {
-                e.preventDefault();
-                handleModeClick(scale.modeOf!.id);
-              }}
-            >
+            <Link to={`/scale/${scale.modeOf.id}`} className="mode-link">
               <strong>{parentScale.name}</strong>
-            </a>{' '}
+            </Link>{' '}
             (starting from step {scale.modeOf.step})
           </div>
         </div>
@@ -133,18 +126,14 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate }: ScaleCa
           <div className="info-label">Modes of this scale:</div>
           <div className="modes-list">
             {modeNames.map(({ step, name, id }) => (
-              <a
+              <Link
                 key={step}
-                href={`#${id}`}
+                to={`/scale/${id}`}
                 className="mode-item"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleModeClick(id);
-                }}
               >
                 <span className="mode-step">{step}</span>
                 <span className="mode-name">{name}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>

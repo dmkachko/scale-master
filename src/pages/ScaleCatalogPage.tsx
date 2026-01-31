@@ -9,7 +9,6 @@ import { usePreferencesStore } from '../store/preferencesStore';
 import { useCatalogInit } from '../hooks/useCatalogInit';
 import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../music/notes';
 import ScaleCard from '../components/ScaleCard';
-import ScaleTypeahead from '../components/ScaleTypeahead';
 import './ScaleCatalogPage.css';
 
 function ScaleCatalogPage() {
@@ -19,13 +18,12 @@ function ScaleCatalogPage() {
   const accidentalPreference = usePreferencesStore((state) => state.accidentalPreference);
   const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
 
-  const [selectedScaleId, setSelectedScaleId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedScaleId, setHighlightedScaleId] = useState<string | null>(null);
+  const [filterQuery, setFilterQuery] = useState('');
   const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleNavigate = (scaleId: string) => {
-    setSelectedScaleId(scaleId);
-    setSearchQuery('');
+    setHighlightedScaleId(scaleId);
 
     // Scroll to the element
     setTimeout(() => {
@@ -42,28 +40,18 @@ function ScaleCatalogPage() {
 
     // Auto-clear highlight after 2 seconds
     highlightTimeoutRef.current = setTimeout(() => {
-      setSelectedScaleId(null);
+      setHighlightedScaleId(null);
     }, 2000);
   };
 
-  const handleScaleSelect = (scaleId: string) => {
-    setSelectedScaleId(scaleId);
-    setSearchQuery('');
-
-    // Scroll to the element
-    setTimeout(() => {
-      const element = document.getElementById(scaleId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterQuery(e.target.value);
+    setHighlightedScaleId(null);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    if (!value) {
-      setSelectedScaleId(null);
-    }
+  const handleClearFilter = () => {
+    setFilterQuery('');
+    setHighlightedScaleId(null);
   };
 
   // Cleanup timeout on unmount
@@ -100,9 +88,16 @@ function ScaleCatalogPage() {
 
   // Render ready state
   if (status === 'ready' && catalog) {
-    // Filter scales based on selection
-    const displayedScales = selectedScaleId
-      ? catalog.scaleTypes.filter((scale) => scale.id === selectedScaleId)
+    // Filter scales based on search query
+    const filteredScales = filterQuery
+      ? catalog.scaleTypes.filter((scale) => {
+          const query = filterQuery.toLowerCase();
+          const matchesName = scale.name.toLowerCase().includes(query);
+          const matchesAlternative = scale.alternativeNames?.some((alt) =>
+            alt.toLowerCase().includes(query)
+          );
+          return matchesName || matchesAlternative;
+        })
       : catalog.scaleTypes;
 
     return (
@@ -123,21 +118,41 @@ function ScaleCatalogPage() {
             </select>
           </div>
 
-          <ScaleTypeahead
-            scales={catalog.scaleTypes}
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onSelect={handleScaleSelect}
-          />
+          <div className="filter-input-wrapper">
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="Filter scales by name..."
+              value={filterQuery}
+              onChange={handleFilterChange}
+              aria-label="Filter scales"
+            />
+            {filterQuery && (
+              <button
+                type="button"
+                className="filter-clear"
+                onClick={handleClearFilter}
+                aria-label="Clear filter"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
 
+        {filterQuery && (
+          <div className="filter-results-info">
+            Showing {filteredScales.length} of {catalog.scaleTypes.length} scales
+          </div>
+        )}
+
         <div className="scale-grid">
-          {displayedScales.map((scale) => (
+          {filteredScales.map((scale) => (
             <ScaleCard
               key={scale.id}
               scale={scale}
               rootNote={selectedRoot}
-              highlighted={selectedScaleId === scale.id}
+              highlighted={highlightedScaleId === scale.id}
               onNavigate={handleNavigate}
             />
           ))}

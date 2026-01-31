@@ -1,0 +1,114 @@
+/**
+ * Scale Page Styles
+ */
+
+.scale-page {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+/* Navigation */
+.scale-page-nav {
+  margin-bottom: var(--spacing-xl);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+}
+
+.back-link:hover {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
+  transform: translateX(-2px);
+}
+
+/* Status Messages */
+.scale-page-status {
+  margin: var(--spacing-2xl) 0;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-secondary);
+  text-align: center;
+}
+
+/* Two Column Layout */
+.scale-page-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+}
+
+.scale-page-left {
+  position: sticky;
+  top: var(--spacing-xl);
+}
+
+.scale-page-right {
+  min-height: 400px;
+}
+
+/* Additional Info Placeholder */
+.additional-info-placeholder {
+  padding: var(--spacing-xl);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+}
+
+.additional-info-placeholder h3 {
+  margin-top: 0;
+  color: var(--color-text-primary);
+}
+
+.additional-info-placeholder p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.additional-info-placeholder ul {
+  color: var(--color-text-secondary);
+  padding-left: var(--spacing-xl);
+}
+
+.additional-info-placeholder li {
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .scale-page-content {
+    grid-template-columns: 1fr;
+  }
+
+  .scale-page-left {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .scale-page {
+    padding: var(--spacing-md);
+  }
+
+  .scale-page-nav {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .scale-page-content {
+    gap: var(--spacing-lg);
+  }
+}
