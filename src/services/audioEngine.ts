@@ -7,47 +7,60 @@
 import * as Tone from 'tone';
 import { useAudioStore } from '../store/audioStore';
 import { usePreferencesStore } from '../store/preferencesStore';
-import { createSynth, volumeToDb, type SynthType } from './synthPresets';
+import { volumeToDb, type SynthType } from './synthPresets';
 import { generateNoteSequence, type ScalePattern } from './scalePatterns';
 
+// Salamander piano samples are stored locally in public/samples/salamander/
+const SALAMANDER_BASE_URL = `${import.meta.env.BASE_URL}samples/salamander/`;
+
+// Salamander samples are recorded in minor thirds (A, C, D#, F#)
+// Files use 's' for sharps (Ds1.mp3, Fs1.mp3) but Tone.js expects note names with '#'
+const SAMPLE_MAPPING: Record<string, string> = {
+  'A0': 'A0.mp3', 'C1': 'C1.mp3', 'D#1': 'Ds1.mp3', 'F#1': 'Fs1.mp3',
+  'A1': 'A1.mp3', 'C2': 'C2.mp3', 'D#2': 'Ds2.mp3', 'F#2': 'Fs2.mp3',
+  'A2': 'A2.mp3', 'C3': 'C3.mp3', 'D#3': 'Ds3.mp3', 'F#3': 'Fs3.mp3',
+  'A3': 'A3.mp3', 'C4': 'C4.mp3', 'D#4': 'Ds4.mp3', 'F#4': 'Fs4.mp3',
+  'A4': 'A4.mp3', 'C5': 'C5.mp3', 'D#5': 'Ds5.mp3', 'F#5': 'Fs5.mp3',
+  'A5': 'A5.mp3', 'C6': 'C6.mp3', 'D#6': 'Ds6.mp3', 'F#6': 'Fs6.mp3',
+  'A6': 'A6.mp3', 'C7': 'C7.mp3', 'D#7': 'Ds7.mp3', 'F#7': 'Fs7.mp3',
+  'A7': 'A7.mp3', 'C8': 'C8.mp3'
+};
+
 class AudioEngine {
-  private synths: Map<SynthType, Tone.PolySynth> = new Map();
+  private sampler: Tone.Sampler | null = null;
   private currentPart: Tone.Part | null = null;
   private initialized = false;
 
   /**
-   * Initialize the synth and audio context
+   * Initialize the sampler and audio context
    */
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
     await Tone.start();
 
-    // Create all three synth types
     const prefs = usePreferencesStore.getState();
 
-    this.synths.set('pads', createSynth('pads', volumeToDb(prefs.synthSettings.pads.volume)));
-    this.synths.set('melody', createSynth('melody', volumeToDb(prefs.synthSettings.melody.volume)));
-    this.synths.set('bass', createSynth('bass', volumeToDb(prefs.synthSettings.bass.volume)));
+    // Create sampler with Salamander piano samples
+    this.sampler = new Tone.Sampler({
+      urls: SAMPLE_MAPPING,
+      baseUrl: SALAMANDER_BASE_URL,
+      volume: volumeToDb(prefs.synthSettings.melody.volume),
+      release: 1,
+    }).toDestination();
+
+    // Wait for samples to load
+    await Tone.loaded();
 
     this.initialized = true;
   }
 
   /**
-   * Get the currently active synth
-   */
-  private getActiveSynth(): Tone.PolySynth | null {
-    const prefs = usePreferencesStore.getState();
-    return this.synths.get(prefs.activeSynthType) || null;
-  }
-
-  /**
-   * Update synth volume
+   * Update sampler volume
    */
   updateSynthVolume(type: SynthType, volumePercent: number): void {
-    const synth = this.synths.get(type);
-    if (synth) {
-      synth.volume.value = volumeToDb(volumePercent);
+    if (this.sampler) {
+      this.sampler.volume.value = volumeToDb(volumePercent);
     }
   }
 
@@ -57,12 +70,11 @@ class AudioEngine {
   async playNote(note: string, octave: number = 4): Promise<void> {
     await this.initialize();
 
-    const synth = this.getActiveSynth();
-    if (!synth) return;
+    if (!this.sampler) return;
 
     const prefs = usePreferencesStore.getState();
     const noteWithOctave = `${note}${octave}`;
-    synth.triggerAttackRelease(noteWithOctave, '8n', undefined, prefs.velocitySettings.normal);
+    this.sampler.triggerAttackRelease(noteWithOctave, '8n', undefined, prefs.velocitySettings.normal);
   }
 
   /**
@@ -71,12 +83,11 @@ class AudioEngine {
   async playChord(notes: string[], octave: number = 4, duration: string = '2n'): Promise<void> {
     await this.initialize();
 
-    const synth = this.getActiveSynth();
-    if (!synth) return;
+    if (!this.sampler) return;
 
     const prefs = usePreferencesStore.getState();
     const notesWithOctave = notes.map((note) => `${note}${octave}`);
-    synth.triggerAttackRelease(notesWithOctave, duration, undefined, prefs.velocitySettings.normal);
+    this.sampler.triggerAttackRelease(notesWithOctave, duration, undefined, prefs.velocitySettings.normal);
   }
 
   /**
@@ -85,8 +96,7 @@ class AudioEngine {
   async playArpeggio(notes: string[], octave: number = 4): Promise<void> {
     await this.initialize();
 
-    const synth = this.getActiveSynth();
-    if (!synth) return;
+    if (!this.sampler) return;
 
     const prefs = usePreferencesStore.getState();
     const now = Tone.now();
@@ -95,7 +105,7 @@ class AudioEngine {
     notes.forEach((note, i) => {
       const noteWithOctave = `${note}${octave}`;
       const time = now + i * noteDuration;
-      synth.triggerAttackRelease(noteWithOctave, '8n', time, prefs.velocitySettings.normal);
+      this.sampler!.triggerAttackRelease(noteWithOctave, '8n', time, prefs.velocitySettings.normal);
     });
   }
 
@@ -112,8 +122,7 @@ class AudioEngine {
   ): Promise<void> {
     await this.initialize();
 
-    const synth = this.getActiveSynth();
-    if (!synth) return;
+    if (!this.sampler) return;
 
     // Stop any currently playing sequence
     this.stop();
@@ -205,7 +214,7 @@ class AudioEngine {
       // Accented notes are slightly longer for emphasis
       const duration = value.isAccent ? '4n' : '8n';
 
-      synth.triggerAttackRelease(noteWithOctave, duration, time, velocity);
+      this.sampler!.triggerAttackRelease(noteWithOctave, duration, time, velocity);
 
       // Schedule the callback to run at the correct time
       Tone.Draw.schedule(() => {
@@ -266,10 +275,10 @@ class AudioEngine {
   dispose(): void {
     this.stop();
 
-    this.synths.forEach((synth) => {
-      synth.dispose();
-    });
-    this.synths.clear();
+    if (this.sampler) {
+      this.sampler.dispose();
+      this.sampler = null;
+    }
 
     this.initialized = false;
   }
