@@ -1124,173 +1124,7 @@
         "BH Major Scale"
       ],
       "modeOf": null,
-      "inversions": {
-        "2": "barry-harris-mode-2",
-        "3": "barry-harris-mode-3",
-        "4": "barry-harris-mode-4",
-        "5": "barry-harris-mode-5",
-        "6": "barry-harris-minor-6th-dim",
-        "7": "barry-harris-mode-7",
-        "8": "barry-harris-mode-8"
-      }
-    },
-    {
-      "id": "barry-harris-mode-2",
-      "name": "BH Mode 2",
-      "family": "bebop",
-      "intervals": [
-        0,
-        2,
-        3,
-        5,
-        6,
-        7,
-        9,
-        11
-      ],
-      "steps": [
-        2,
-        1,
-        2,
-        1,
-        1,
-        2,
-        1,
-        2
-      ],
-      "modeOf": {
-        "id": "barry-harris-major-6th-dim",
-        "step": 2
-      },
-      "inversions": {
-        "2": "barry-harris-mode-3",
-        "3": "barry-harris-mode-4",
-        "4": "barry-harris-mode-5",
-        "5": "barry-harris-minor-6th-dim",
-        "6": "barry-harris-mode-7",
-        "7": "barry-harris-mode-8",
-        "8": "barry-harris-major-6th-dim"
-      }
-    },
-    {
-      "id": "barry-harris-mode-3",
-      "name": "BH Mode 3",
-      "family": "bebop",
-      "intervals": [
-        0,
-        1,
-        3,
-        4,
-        5,
-        7,
-        9,
-        10
-      ],
-      "steps": [
-        1,
-        2,
-        1,
-        1,
-        2,
-        1,
-        2,
-        2
-      ],
-      "modeOf": {
-        "id": "barry-harris-major-6th-dim",
-        "step": 3
-      },
-      "inversions": {
-        "2": "barry-harris-mode-4",
-        "3": "barry-harris-mode-5",
-        "4": "barry-harris-minor-6th-dim",
-        "5": "barry-harris-mode-7",
-        "6": "barry-harris-mode-8",
-        "7": "barry-harris-major-6th-dim",
-        "8": "barry-harris-mode-2"
-      }
-    },
-    {
-      "id": "barry-harris-mode-4",
-      "name": "BH Mode 4",
-      "family": "bebop",
-      "intervals": [
-        0,
-        2,
-        3,
-        4,
-        6,
-        8,
-        9,
-        11
-      ],
-      "steps": [
-        2,
-        1,
-        1,
-        2,
-        1,
-        2,
-        2,
-        1
-      ],
-      "alternativeNames": [
-        "Lydian Diminished"
-      ],
-      "modeOf": {
-        "id": "barry-harris-major-6th-dim",
-        "step": 4
-      },
-      "inversions": {
-        "2": "barry-harris-mode-5",
-        "3": "barry-harris-minor-6th-dim",
-        "4": "barry-harris-mode-7",
-        "5": "barry-harris-mode-8",
-        "6": "barry-harris-major-6th-dim",
-        "7": "barry-harris-mode-2",
-        "8": "barry-harris-mode-3"
-      }
-    },
-    {
-      "id": "barry-harris-mode-5",
-      "name": "BH Dominant",
-      "family": "bebop",
-      "intervals": [
-        0,
-        1,
-        2,
-        4,
-        6,
-        7,
-        9,
-        10
-      ],
-      "steps": [
-        1,
-        1,
-        2,
-        1,
-        2,
-        2,
-        1,
-        2
-      ],
-      "alternativeNames": [
-        "Dominant Diminished"
-      ],
-      "modeOf": {
-        "id": "barry-harris-major-6th-dim",
-        "step": 5
-      },
-      "inversions": {
-        "2": "barry-harris-minor-6th-dim",
-        "3": "barry-harris-mode-7",
-        "4": "barry-harris-mode-8",
-        "5": "barry-harris-major-6th-dim",
-        "6": "barry-harris-mode-2",
-        "7": "barry-harris-mode-3",
-        "8": "barry-harris-mode-4"
-      }
+      "inversions": {}
     },
     {
       "id": "barry-harris-minor-6th-dim",
@@ -1298,20 +1132,20 @@
       "family": "bebop",
       "intervals": [
         0,
-        1,
+        2,
         3,
         5,
-        6,
+        7,
         8,
         9,
         11
       ],
       "steps": [
-        1,
         2,
         1,
         2,
         2,
+        1,
         1,
         2,
         1
@@ -1320,23 +1154,12 @@
         "Minor 6 Diminished Scale",
         "BH Minor Scale"
       ],
-      "modeOf": {
-        "id": "barry-harris-major-6th-dim",
-        "step": 6
-      },
-      "inversions": {
-        "2": "barry-harris-mode-7",
-        "3": "barry-harris-mode-8",
-        "4": "barry-harris-major-6th-dim",
-        "5": "barry-harris-mode-2",
-        "6": "barry-harris-mode-3",
-        "7": "barry-harris-mode-4",
-        "8": "barry-harris-mode-5"
-      }
+      "modeOf": null,
+      "inversions": {}
     },
     {
-      "id": "barry-harris-mode-7",
-      "name": "BH Mode 7",
+      "id": "barry-harris-dom7-dim",
+      "name": "BH Dominant 7th Diminished",
       "family": "bebop",
       "intervals": [
         0,
@@ -1344,71 +1167,57 @@
         4,
         5,
         7,
-        8,
+        9,
         10,
         11
       ],
       "steps": [
         2,
-        1,
-        2,
         2,
         1,
         2,
+        2,
+        1,
         1,
         1
       ],
-      "modeOf": {
-        "id": "barry-harris-major-6th-dim",
-        "step": 7
-      },
-      "inversions": {
-        "2": "barry-harris-mode-8",
-        "3": "barry-harris-major-6th-dim",
-        "4": "barry-harris-mode-2",
-        "5": "barry-harris-mode-3",
-        "6": "barry-harris-mode-4",
-        "7": "barry-harris-mode-5",
-        "8": "barry-harris-minor-6th-dim"
-      }
+      "alternativeNames": [
+        "Dominant 7 Diminished Scale",
+        "BH Dom7 Scale"
+      ],
+      "modeOf": null,
+      "inversions": {}
     },
     {
-      "id": "barry-harris-mode-8",
-      "name": "BH Mode 8",
+      "id": "barry-harris-dom7b5-dim",
+      "name": "BH Dominant 7th ♭5 Diminished",
       "family": "bebop",
       "intervals": [
         0,
         2,
-        3,
+        4,
         5,
         6,
-        8,
+        7,
         9,
         10
       ],
       "steps": [
-        1,
         2,
         2,
         1,
-        2,
         1,
+        1,
+        2,
         1,
         2
       ],
-      "modeOf": {
-        "id": "barry-harris-major-6th-dim",
-        "step": 8
-      },
-      "inversions": {
-        "2": "barry-harris-major-6th-dim",
-        "3": "barry-harris-mode-2",
-        "4": "barry-harris-mode-3",
-        "5": "barry-harris-mode-4",
-        "6": "barry-harris-mode-5",
-        "7": "barry-harris-minor-6th-dim",
-        "8": "barry-harris-mode-7"
-      }
+      "alternativeNames": [
+        "Dominant 7 ♭5 Diminished Scale",
+        "BH Dom7♭5 Scale"
+      ],
+      "modeOf": null,
+      "inversions": {}
     }
   ]
 }
