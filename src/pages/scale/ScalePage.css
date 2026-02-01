@@ -74,46 +74,54 @@
   display: none; /* Chrome, Safari and Opera */
 }
 
-/* Pattern Selector */
-.pattern-selector {
+/* Scale Controls (Pattern + Root Selector) */
+.scale-controls {
   display: flex;
-  flex-direction: row;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
+  align-items: flex-start;
+}
+
+
+.selector-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin-right: var(--spacing-xs);
+  align-self: center;
+}
+
+/* Root Selector */
+.root-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-md);
 }
 
-.pattern-option {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs);
+.root-select {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.pattern-option:hover {
-  background-color: var(--color-bg-tertiary);
-}
-
-.pattern-option input[type='radio'] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--color-brand-primary);
-  flex-shrink: 0;
-}
-
-.pattern-name {
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-  user-select: none;
-  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-base);
 }
+
+.root-select:hover {
+  border-color: var(--color-brand-primary);
+}
+
+.root-select:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+}
+
 
 /* Additional Info Placeholder */
 .additional-info-placeholder {

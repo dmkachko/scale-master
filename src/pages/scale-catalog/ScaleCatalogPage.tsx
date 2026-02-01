@@ -14,12 +14,11 @@ import './ScaleCatalogPage.css';
 function ScaleCatalogPage() {
   useCatalogInit();
 
-  const { status, catalog, error, selectedRoot, setSelectedRoot } = useCatalogStore();
+  const { status, catalog, error, selectedRoot, setSelectedRoot, filterQuery, setFilterQuery } = useCatalogStore();
   const accidentalPreference = usePreferencesStore((state) => state.accidentalPreference);
   const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
 
   const [highlightedScaleId, setHighlightedScaleId] = useState<string | null>(null);
-  const [filterQuery, setFilterQuery] = useState('');
   const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleNavigate = (scaleId: string) => {

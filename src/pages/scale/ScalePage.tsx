@@ -10,17 +10,18 @@ import { useCatalogInit } from '../../hooks/useCatalogInit.ts';
 import RouteGuard from '../../components/RouteGuard.tsx';
 import NotFoundPage from '../errors/NotFoundPage.tsx';
 import ScaleCard from '../../components/ScaleCard.tsx';
+import PatternSelector from '../../components/PatternSelector.tsx';
 import TriadsSection from './TriadsSection.tsx';
 import RelativesSection from './RelativesSection.tsx';
-import { calculateScaleNotes } from '../../music/notes.ts';
-import { patterns, type ScalePattern } from '../../services/scalePatterns.ts';
+import { calculateScaleNotes, NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../../music/notes.ts';
 import './ScalePage.css';
 
 function ScalePage() {
   useCatalogInit();
   const { scaleId } = useParams<{ scaleId: string }>();
-  const { catalog, selectedRoot } = useCatalogStore();
+  const { catalog, selectedRoot, setSelectedRoot } = useCatalogStore();
   const { playbackPattern, setPlaybackPattern, accidentalPreference } = usePreferencesStore();
+  const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
 
   // Find the scale by ID
   const scale = catalog?.scaleTypes.find((s) => s.id === scaleId);
@@ -38,19 +39,27 @@ function ScalePage() {
         <div className="scale-page">
           <div className="scale-page-content">
             <div className="scale-page-left">
-              <div className="pattern-selector">
-                {Object.values(patterns).map((pattern) => (
-                  <label key={pattern.id} className="pattern-option">
-                    <input
-                      type="radio"
-                      name="pattern"
-                      value={pattern.id}
-                      checked={playbackPattern === pattern.id}
-                      onChange={() => setPlaybackPattern(pattern.id as ScalePattern)}
-                    />
-                    <span className="pattern-name">{pattern.name}</span>
-                  </label>
-                ))}
+              <div className="scale-controls">
+                <PatternSelector
+                  value={playbackPattern}
+                  onChange={setPlaybackPattern}
+                />
+
+                <div className="root-selector">
+                  <label htmlFor="root-select" className="selector-label">Root:</label>
+                  <select
+                    id="root-select"
+                    value={selectedRoot}
+                    onChange={(e) => setSelectedRoot(Number(e.target.value))}
+                    className="root-select"
+                  >
+                    {noteNames.map((note, index) => (
+                      <option key={index} value={index}>
+                        {note}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <ScaleCard scale={scale} rootNote={selectedRoot} showMoreLink={false} />

@@ -15,12 +15,14 @@ interface CatalogState {
   indexes: CatalogIndexes | null;
   error: string | null;
   selectedRoot: number;
+  filterQuery: string;
 
   // Actions
   setCatalogLoading: () => void;
   setCatalogReady: (catalog: Catalog, indexes: CatalogIndexes) => void;
   setCatalogError: (error: string) => void;
   setSelectedRoot: (root: number) => void;
+  setFilterQuery: (query: string) => void;
 }
 
 export const useCatalogStore = create<CatalogState>()(
@@ -32,6 +34,7 @@ export const useCatalogStore = create<CatalogState>()(
       indexes: null,
       error: null,
       selectedRoot: 0, // Default to C
+      filterQuery: '',
 
       // Actions
       setCatalogLoading: () =>
@@ -53,6 +56,9 @@ export const useCatalogStore = create<CatalogState>()(
 
       setSelectedRoot: (root) =>
         set({ selectedRoot: root }, false, 'catalog/setSelectedRoot'),
+
+      setFilterQuery: (query) =>
+        set({ filterQuery: query }, false, 'catalog/setFilterQuery'),
     }),
     { name: 'CatalogStore' }
   )

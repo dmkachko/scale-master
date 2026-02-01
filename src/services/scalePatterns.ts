@@ -19,15 +19,15 @@ export interface PatternDescriptor {
 export const patterns: Record<ScalePattern, PatternDescriptor> = {
   ascending: {
     id: 'ascending',
-    name: 'Ascending',
+    name: 'Asc',
   },
   descending: {
     id: 'descending',
-    name: 'Descending',
+    name: 'Desc',
   },
   alternating: {
     id: 'alternating',
-    name: 'Alternating',
+    name: 'Alt',
   },
   ladder: {
     id: 'ladder',
