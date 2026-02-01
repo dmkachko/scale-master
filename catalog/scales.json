@@ -1097,7 +1097,7 @@
     },
     {
       "id": "barry-harris-major-6th-dim",
-      "name": "Barry Harris Major 6th Diminished",
+      "name": "BH Major 6th Diminished",
       "family": "bebop",
       "intervals": [
         0,
@@ -1121,7 +1121,7 @@
       ],
       "alternativeNames": [
         "Major 6 Diminished Scale",
-        "Barry Harris Major Scale"
+        "BH Major Scale"
       ],
       "modeOf": null,
       "inversions": {
@@ -1136,7 +1136,7 @@
     },
     {
       "id": "barry-harris-mode-2",
-      "name": "Barry Harris Mode 2",
+      "name": "BH Mode 2",
       "family": "bebop",
       "intervals": [
         0,
@@ -1174,7 +1174,7 @@
     },
     {
       "id": "barry-harris-mode-3",
-      "name": "Barry Harris Mode 3",
+      "name": "BH Mode 3",
       "family": "bebop",
       "intervals": [
         0,
@@ -1212,7 +1212,7 @@
     },
     {
       "id": "barry-harris-mode-4",
-      "name": "Barry Harris Mode 4",
+      "name": "BH Mode 4",
       "family": "bebop",
       "intervals": [
         0,
@@ -1253,7 +1253,7 @@
     },
     {
       "id": "barry-harris-mode-5",
-      "name": "Barry Harris Mode 5",
+      "name": "BH Mode 5",
       "family": "bebop",
       "intervals": [
         0,
@@ -1294,7 +1294,7 @@
     },
     {
       "id": "barry-harris-minor-6th-dim",
-      "name": "Barry Harris Minor 6th Diminished",
+      "name": "BH Minor 6th Diminished",
       "family": "bebop",
       "intervals": [
         0,
@@ -1318,7 +1318,7 @@
       ],
       "alternativeNames": [
         "Minor 6 Diminished Scale",
-        "Barry Harris Minor Scale"
+        "BH Minor Scale"
       ],
       "modeOf": {
         "id": "barry-harris-major-6th-dim",
@@ -1336,7 +1336,7 @@
     },
     {
       "id": "barry-harris-mode-7",
-      "name": "Barry Harris Mode 7",
+      "name": "BH Mode 7",
       "family": "bebop",
       "intervals": [
         0,
@@ -1374,7 +1374,7 @@
     },
     {
       "id": "barry-harris-mode-8",
-      "name": "Barry Harris Mode 8",
+      "name": "BH Mode 8",
       "family": "bebop",
       "intervals": [
         0,
