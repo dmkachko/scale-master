@@ -56,6 +56,7 @@
   padding: var(--spacing-md);
   text-decoration: none;
   transition: all var(--transition-base);
+  position: relative;
 }
 
 .relative-card:hover {
@@ -90,6 +91,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  padding-bottom: var(--spacing-md);
 }
 
 .interval-badge {
@@ -122,6 +124,15 @@
 .interval-badge.note-down:hover {
   transform: scale(1.1);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.relative-mode-info {
+  position: absolute;
+  right: var(--spacing-md);
+  bottom: var(--spacing-xs);
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  opacity: 0.8;
 }
 
 /* Responsive adjustments */

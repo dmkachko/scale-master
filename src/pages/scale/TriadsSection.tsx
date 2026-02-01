@@ -9,7 +9,7 @@ import {calculateTriads, getTriadName, getTriadAbbreviation, type Triad} from '.
 import './TriadsSection.css';
 
 interface TriadsSectionProps {
-    scaleNotes: string[];
+    scaleNotes: string[];for
     scaleIntervals: number[];
 }
 
@@ -59,6 +59,9 @@ function TriadsSection({scaleNotes, scaleIntervals}: TriadsSectionProps) {
                             <div className="triad-name">
                                 <div className="triad-abbreviation">
                                     {getTriadAbbreviation(triad.root, triad.quality)}
+                                    {triad.extensions && triad.extensions.length > 0 && (
+                                        <span className="triad-extensions"> ({triad.extensions.join(', ')})</span>
+                                    )}
                                 </div>
                             </div>
                         </div>

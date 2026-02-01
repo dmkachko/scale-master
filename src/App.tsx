@@ -14,7 +14,7 @@ import './App.css';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/scale-master">
       <Layout>
         <Routes>
           <Route path="/" element={<ScaleCatalogPage />} />

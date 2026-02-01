@@ -12,7 +12,7 @@ import { ZodError } from 'zod';
  */
 export async function loadCatalog(): Promise<Catalog> {
   try {
-    const response = await fetch('/catalog/scales.json');
+    const response = await fetch(`${import.meta.env.BASE_URL}catalog/scales.json`);
 
     if (!response.ok) {
       throw new Error(`Failed to load catalog: ${response.status} ${response.statusText}`);

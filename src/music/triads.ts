@@ -11,6 +11,7 @@ export interface Triad {
   quality: TriadQuality;
   notes: string[]; // Three notes of the triad
   romanNumeral: string; // e.g., 'I', 'ii', 'iii°'
+  extensions?: string[]; // Available extensions (e.g., ['alt5', '7'])
 }
 
 /**
@@ -105,6 +106,55 @@ export function getTriadAbbreviation(root: string, quality: TriadQuality): strin
 }
 
 /**
+ * Calculates available extensions for a triad based on scale intervals
+ * @param rootInterval - The interval of the triad root in the scale
+ * @param fifthInterval - The actual fifth interval of the triad (7 for perfect, 6 for dim, 8 for aug)
+ * @param scaleIntervals - All intervals in the scale
+ */
+function calculateExtensions(
+  rootInterval: number,
+  fifthInterval: number,
+  scaleIntervals: number[]
+): string[] {
+  const extensions: string[] = [];
+
+  // Get all intervals available from this root note
+  const availableIntervals = scaleIntervals.map(interval => (interval - rootInterval + 12) % 12);
+
+  const hasNaturalFifth = fifthInterval === 7;
+  const hasDimFifth = fifthInterval === 6;
+  const hasAugFifth = fifthInterval === 8;
+  const scaleHasAugFifth = availableIntervals.includes(8);
+  const scaleHasSixth = availableIntervals.includes(9);
+  const scaleHasMinorSeventh = availableIntervals.includes(10);
+  const scaleHasMajorSeventh = availableIntervals.includes(11);
+
+  // Rule 1: If chord has b5, check if scale has #5, add "alt5"
+  if (hasDimFifth && scaleHasAugFifth) {
+    extensions.push('alt5');
+  }
+
+  // Rule 2: If chord has natural 5 and scale has #5, add "#5"
+  if (hasNaturalFifth && scaleHasAugFifth) {
+    extensions.push('#5');
+  }
+
+  // Rule 3: If scale has 6 and chord doesn't have #5, add "6"
+  if (scaleHasSixth && !hasAugFifth) {
+    extensions.push('6');
+  }
+
+  // Rule 4: Add 7 or maj7 if available
+  if (scaleHasMajorSeventh) {
+    extensions.push('maj7');
+  } else if (scaleHasMinorSeventh) {
+    extensions.push('7');
+  }
+
+  return extensions;
+}
+
+/**
  * Calculates all triads in a scale
  * @param scaleNotes - Array of note names in the scale
  * @param scaleIntervals - Array of intervals (semitones from root)
@@ -141,12 +191,19 @@ export function calculateTriads(scaleNotes: string[], scaleIntervals: number[]):
     const quality = determineTriadQuality([rootToThird, thirdToFifth]);
     const romanNumeral = getRomanNumeral(i, quality);
 
+    // Calculate the actual fifth interval (7 for perfect, 6 for dim, 8 for aug)
+    const actualFifthInterval = rootToThird + thirdToFifth;
+
+    // Calculate available extensions
+    const extensions = calculateExtensions(rootInterval, actualFifthInterval, scaleIntervals);
+
     triads.push({
       degree: i,
       root: rootNote,
       quality,
       notes: [rootNote, thirdNote, fifthNote],
       romanNumeral,
+      extensions: extensions.length > 0 ? extensions : undefined,
     });
   }
 

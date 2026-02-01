@@ -57,6 +57,15 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
     ? catalog?.scaleTypes.find((s) => s.id === scale.modeOf?.id)
     : null;
 
+  // Calculate parent scale root note
+  const parentRootNote = parentScale && scale.modeOf
+    ? (rootNote - parentScale.intervals[scale.modeOf.step - 1] + 12) % 12
+    : null;
+
+  const parentRootNoteName = parentRootNote !== null
+    ? calculateScaleNotes(parentRootNote, [0], preferSharps)[0]
+    : null;
+
   // Get mode names from inversions
   const modeNames = scale.inversions
     ? Object.entries(scale.inversions).map(([step, scaleId]) => {
@@ -166,12 +175,12 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
         )}
       </div>
 
-      {parentScale && scale.modeOf && (
+      {parentScale && scale.modeOf && parentRootNoteName && (
         <div className="scale-info-section mode-of">
           <div className="info-label">Mode of:</div>
           <div className="info-value">
             <Link to={`/scale/${scale.modeOf.id}`} className="mode-link">
-              <strong>{parentScale.name}</strong>
+              <strong>{parentRootNoteName} {parentScale.name}</strong>
             </Link>{' '}
             (starting from step {scale.modeOf.step})
           </div>
@@ -187,6 +196,7 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
                 key={step}
                 to={`/scale/${id}`}
                 className="mode-item"
+        
               >
                 <span className="mode-step">{step}</span>
                 <span className="mode-name">{name}</span>

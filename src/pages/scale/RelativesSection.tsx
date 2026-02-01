@@ -62,6 +62,20 @@ function RelativesSection({ currentScale, allScales, rootNote, preferSharps }: R
               });
             }
 
+            // Get parent scale info if this is a mode
+            const parentScale = relative.scale.modeOf
+              ? allScales.find((s) => s.id === relative.scale.modeOf?.id)
+              : null;
+
+            // Calculate parent scale root note
+            const parentRootNote = parentScale && relative.scale.modeOf
+              ? (rootNote - parentScale.intervals[relative.scale.modeOf.step - 1] + 12) % 12
+              : null;
+
+            const parentRootNoteName = parentRootNote !== null
+              ? calculateScaleNotes(parentRootNote, [0], preferSharps)[0]
+              : null;
+
             return (
               <Link
                 key={`${relative.scale.id}-${index}`}
@@ -94,6 +108,12 @@ function RelativesSection({ currentScale, allScales, rootNote, preferSharps }: R
                     );
                   })}
                 </div>
+
+                {parentScale && parentRootNoteName && (
+                  <div className="relative-mode-info">
+                    Mode of {parentRootNoteName} {parentScale.name}
+                  </div>
+                )}
               </Link>
             );
           })}
