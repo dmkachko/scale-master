@@ -198,6 +198,20 @@
   justify-content: center;
   gap: var(--spacing-xs);
   transition: all var(--transition-base);
+  border: 2px solid transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+.scale-card .note-name-cell:hover:not(:disabled) {
+  background-color: var(--color-success-light);
+  transform: scale(1.05);
+  border-color: var(--color-success-text);
+}
+
+.scale-card .note-name-cell:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .scale-card .note-name-cell.playing {
@@ -205,37 +219,6 @@
   color: var(--color-text-primary);
   transform: scale(1.05);
   box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
-}
-
-.note-play-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  padding: 0;
-  color: inherit;
-}
-
-.note-play-button:hover:not(:disabled) {
-  background-color: rgba(0, 0, 0, 0.4);
-  transform: scale(1.1);
-}
-
-.note-play-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.play-icon-small {
-  font-size: 8px;
-  display: inline-block;
-  margin-left: 1px;
 }
 
 .note-name {

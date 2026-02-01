@@ -4,9 +4,8 @@
  */
 
 import { Link } from 'react-router-dom';
-import { calculateScaleNotes } from '../music/notes';
+import { calculateScaleNotes, addOctavesToNotes } from '../music/notes';
 import { analyzeScaleCharacteristics } from '../music/characteristics';
-import { intervalsToRomanNumerals } from '../music/degrees';
 import { usePreferencesStore } from '../store/preferencesStore';
 import { useCatalogStore } from '../store/catalogStore';
 import { useAudioPlayback } from '../hooks/useAudioPlayback';
@@ -39,12 +38,17 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
   });
 
   const notes = calculateScaleNotes(rootNote, scale.intervals, preferSharps);
+  const notesWithOctaves = addOctavesToNotes(notes, 4); // Calculate proper octaves
   const characteristics = analyzeScaleCharacteristics(scale.intervals);
-  const romanNumerals = intervalsToRomanNumerals(scale.intervals);
 
-  const handlePlayNote = async (note: string) => {
+  const handlePlayNote = async (noteWithOctave: string) => {
     if (!isPlaying) {
-      await playNote(note);
+      // Extract note name and octave
+      const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/);
+      if (match) {
+        const [, note, octave] = match;
+        await playNote(note, parseInt(octave));
+      }
     }
   };
 
@@ -138,30 +142,17 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
             const isCurrentNote = currentNoteStep === idx;
 
             return (
-              <div
+              <button
                 key={idx}
+                onClick={() => handlePlayNote(notesWithOctaves[idx])}
                 className={`note-cell note-name-cell ${isCurrentNote ? 'playing' : ''}`}
+                aria-label={`Play ${note}`}
+                disabled={isPlaying}
               >
-                <button
-                  onClick={() => handlePlayNote(note)}
-                  className="note-play-button"
-                  aria-label={`Play ${note}`}
-                  disabled={isPlaying}
-                >
-                  <span className="play-icon-small">▶</span>
-                </button>
                 <span className="note-name">{note}</span>
-              </div>
+              </button>
             );
           })}
-        </div>
-
-        <div className="note-row degrees-row">
-          {romanNumerals.map((numeral, idx) => (
-            <div key={idx} className="note-cell degree-cell">
-              {numeral}
-            </div>
-          ))}
         </div>
 
         {scale.steps && (

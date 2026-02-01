@@ -57,7 +57,11 @@ function ScalePage() {
             </div>
 
             <div className="scale-page-right">
-              <TriadsSection scaleNotes={scaleNotes} scaleIntervals={scale.intervals} />
+              <TriadsSection
+                scaleNotes={scaleNotes}
+                scaleIntervals={scale.intervals}
+                scaleFamily={scale.family}
+              />
               <RelativesSection
                 currentScale={scale}
                 allScales={catalog?.scaleTypes || []}

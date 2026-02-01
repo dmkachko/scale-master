@@ -9,6 +9,7 @@ import { useAudioStore } from '../store/audioStore';
 import { usePreferencesStore } from '../store/preferencesStore';
 import { volumeToDb, type SynthType } from './synthPresets';
 import { generateNoteSequence, type ScalePattern } from './scalePatterns';
+import { getPitchClassFromNote, addOctavesToNotes } from '../music/notes';
 
 // Salamander piano samples are stored locally in public/samples/salamander/
 const SALAMANDER_BASE_URL = `${import.meta.env.BASE_URL}samples/salamander/`;
@@ -86,7 +87,13 @@ class AudioEngine {
     if (!this.sampler) return;
 
     const prefs = usePreferencesStore.getState();
-    const notesWithOctave = notes.map((note) => `${note}${octave}`);
+
+    // Check if notes already have octaves (e.g., "C4" vs "C")
+    const hasOctaves = notes.some(note => /\d$/.test(note));
+    const notesWithOctave = hasOctaves
+      ? notes
+      : addOctavesToNotes(notes, octave);
+
     this.sampler.triggerAttackRelease(notesWithOctave, duration, undefined, prefs.velocitySettings.normal);
   }
 
@@ -102,8 +109,13 @@ class AudioEngine {
     const now = Tone.now();
     const noteDuration = 0.2; // 200ms per note
 
-    notes.forEach((note, i) => {
-      const noteWithOctave = `${note}${octave}`;
+    // Check if notes already have octaves (e.g., "C4" vs "C")
+    const hasOctaves = notes.some(note => /\d$/.test(note));
+    const notesWithOctave = hasOctaves
+      ? notes
+      : addOctavesToNotes(notes, octave);
+
+    notesWithOctave.forEach((noteWithOctave, i) => {
       const time = now + i * noteDuration;
       this.sampler!.triggerAttackRelease(noteWithOctave, '8n', time, prefs.velocitySettings.normal);
     });
@@ -127,8 +139,11 @@ class AudioEngine {
     // Stop any currently playing sequence
     this.stop();
 
+    // Get root pitch class for proper octave calculation
+    const rootPitchClass = getPitchClassFromNote(notes[0]);
+
     // Generate note sequence based on pattern (includes octave offsets)
-    const noteSequence = generateNoteSequence(notes, pattern);
+    const noteSequence = generateNoteSequence(notes, pattern, rootPitchClass);
 
     // Set the tempo
     Tone.Transport.bpm.value = tempo;
@@ -139,9 +154,6 @@ class AudioEngine {
 
     const store = useAudioStore.getState();
     const prefs = usePreferencesStore.getState();
-
-    // Get pattern steps to map sequence index to scale degree
-    const patternSteps = generateNoteSequence(notes, pattern);
 
     // Create note events - notes play continuously
     const noteEvents: Array<{
