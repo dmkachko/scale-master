@@ -68,3 +68,70 @@ export function addOctavesToNotes(notes: string[], baseOctave: number = 4): stri
     return `${note}${currentOctave}`;
   });
 }
+
+/**
+ * Result of parsing note input
+ */
+export interface ParseNotesResult {
+  notes: string[];
+  pitchClasses: Set<number>;
+  errors: string[];
+}
+
+/**
+ * Parse note input string into array of note names and pitch classes
+ * Supports formats: "C E G", "C, E, G", "C# Eb G", "C#,Eb,G"
+ * @param input - User input string with note names
+ * @returns Object with parsed notes, pitch classes (deduplicated), and any errors
+ */
+export function parseNotes(input: string): ParseNotesResult {
+  const errors: string[] = [];
+  const notes: string[] = [];
+  const pitchClasses = new Set<number>();
+
+  if (!input || input.trim() === '') {
+    return { notes: [], pitchClasses: new Set(), errors: [] };
+  }
+
+  // Split by comma or whitespace
+  const tokens = input
+    .split(/[\s,]+/)
+    .map(t => t.trim())
+    .filter(t => t.length > 0);
+
+  for (const token of tokens) {
+    // Match note pattern: A-G, optional accidental (#, b, ♯, ♭), optional octave (ignored)
+    const match = token.match(/^([A-G])([#b♯♭])?(\d+)?$/i);
+
+    if (!match) {
+      errors.push(`Invalid note: "${token}"`);
+      continue;
+    }
+
+    const [, letter, accidental] = match;
+
+    // Normalize accidental symbols
+    let normalizedAccidental = '';
+    if (accidental === '#' || accidental === '♯') {
+      normalizedAccidental = '#';
+    } else if (accidental === 'b' || accidental === '♭') {
+      normalizedAccidental = 'b';
+    }
+
+    const noteName = letter.toUpperCase() + normalizedAccidental;
+    const pitchClass = getPitchClassFromNote(noteName);
+
+    if (pitchClass === -1 || pitchClass === undefined) {
+      errors.push(`Invalid note: "${token}"`);
+      continue;
+    }
+
+    // Only add if not already present (deduplicate enharmonics)
+    if (!pitchClasses.has(pitchClass)) {
+      notes.push(noteName);
+      pitchClasses.add(pitchClass);
+    }
+  }
+
+  return { notes, pitchClasses, errors };
+}
