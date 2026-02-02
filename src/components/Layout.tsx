@@ -35,6 +35,7 @@ function Layout({ children }: LayoutProps) {
     { path: '/', label: 'Scale Catalog' },
     { path: '/scale-finder', label: 'Scale Finder' },
     { path: '/chord-search', label: 'Chord Search' },
+    { path: '/sequence-builder', label: 'Sequence Builder' },
   ];
 
   const handleSynthVolumeChange = (type: 'pads' | 'melody' | 'bass', volume: number) => {

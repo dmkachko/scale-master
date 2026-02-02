@@ -1,0 +1,319 @@
+.container {
+  padding: var(--spacing-2xl);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.header h1 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+/* Sequence Section */
+.sequenceSection {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border-primary);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.controls {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.sequenceScroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 200px;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.statesList {
+  display: flex;
+  gap: var(--spacing-lg);
+  min-width: min-content;
+}
+
+.stateCard {
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  min-width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.stateCard:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.currentCard {
+  border-color: var(--color-brand-primary);
+  background: var(--color-bg-tertiary);
+  box-shadow: var(--shadow-brand);
+}
+
+.savedCard {
+  border-color: var(--color-success-text);
+}
+
+.stateNumber {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.stateContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.chordDisplay {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.chordDisplay:hover {
+  color: var(--color-brand-primary);
+}
+
+.emptyChord {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  cursor: default;
+}
+
+.emptyChord:hover {
+  color: var(--color-text-tertiary);
+}
+
+.modePlaceholders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.modePlaceholder {
+  color: var(--color-text-secondary);
+}
+
+.placeholderText {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.cellControls {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.cellButton {
+  background: var(--color-brand-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-base);
+  flex: 1;
+}
+
+.cellButton:hover {
+  background: var(--color-brand-primary-hover);
+}
+
+.cellButtonDanger {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  flex: 1;
+}
+
+.cellButtonDanger:hover {
+  background: var(--color-error-border);
+  color: white;
+}
+
+/* Selector Section */
+.selectorSection {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border-primary);
+}
+
+.chordGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.chordOption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.chordButton {
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.chordButton:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-brand-primary);
+  transform: translateY(-2px);
+}
+
+.chordButton:active {
+  transform: translateY(0);
+}
+
+.chordActions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.addButton {
+  background: var(--color-brand-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-base);
+  flex: 1;
+}
+
+.addButton:hover {
+  background: var(--color-brand-primary-hover);
+}
+
+.replaceButton {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  flex: 1;
+}
+
+.replaceButton:hover {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-text-secondary);
+}
+
+/* Buttons */
+.primaryButton {
+  background: var(--color-brand-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.primaryButton:hover {
+  background: var(--color-brand-primary-hover);
+}
+
+.primaryButton:disabled {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.primaryButton:disabled:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.secondaryButton:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-text-secondary);
+}
