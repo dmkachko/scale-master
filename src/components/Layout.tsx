@@ -34,7 +34,7 @@ function Layout({ children }: LayoutProps) {
   const navItems = [
     { path: '/', label: 'Scale Catalog' },
     { path: '/scale-finder', label: 'Scale Finder' },
-    { path: '/scale-details', label: 'Scale Details' },
+    { path: '/chord-search', label: 'Chord Search' },
   ];
 
   const handleSynthVolumeChange = (type: 'pads' | 'melody' | 'bass', volume: number) => {
