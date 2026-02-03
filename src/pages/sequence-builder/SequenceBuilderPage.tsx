@@ -53,7 +53,7 @@ export default function SequenceBuilderPage() {
             <div className={styles.controls}>
               <button
                 onClick={clearSequence}
-                className={styles.secondaryButton}
+                className="btn btn-secondary btn-sm"
               >
                 Clear
               </button>
@@ -102,7 +102,7 @@ export default function SequenceBuilderPage() {
                                 e.stopPropagation();
                                 saveDraft();
                               }}
-                              className={styles.cellButton}
+                              className="btn btn-primary btn-sm"
                             >
                               Save
                             </button>
@@ -113,7 +113,7 @@ export default function SequenceBuilderPage() {
                                 e.stopPropagation();
                                 moveToPrevious();
                               }}
-                              className={styles.cellButton}
+                              className="btn btn-secondary btn-sm"
                             >
                               &lt;
                             </button>
@@ -150,14 +150,14 @@ export default function SequenceBuilderPage() {
                         selectChord(chord);
                         saveDraft();
                       }}
-                      className={styles.addButton}
+                      className="btn btn-primary btn-sm"
                       title="Add this chord and save"
                     >
                       Add
                     </button>
                     <button
                       onClick={() => selectChord(chord)}
-                      className={styles.replaceButton}
+                      className="btn btn-secondary btn-sm"
                       title="Replace draft chord without saving"
                     >
                       Replace

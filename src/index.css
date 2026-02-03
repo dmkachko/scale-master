@@ -5,6 +5,7 @@
 
 @import './styles/tokens.css';
 @import './styles/utilities.css';
+@import './styles/buttons.css';
 
 :root {
   font-family: var(--font-sans);
