@@ -55,10 +55,10 @@ export const useSequenceBuilderStore = create<SequenceBuilderState>()(
         selectChord: (chord) =>
           set(
             (state) => {
-              // Update draft with selected chord
+              // Update draft with selected chord, preserving s1
               if (state.draft !== null) {
                 return {
-                  draft: createChordState(chord.displayName, false),
+                  draft: createChordState(chord.displayName, false, state.draft.s1),
                   selectedChord: chord,
                 };
               }

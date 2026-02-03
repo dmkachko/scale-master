@@ -3,6 +3,7 @@ import type { Chord } from '../../music/chordParser';
 import { getPossibleNextChords, chordToNotes } from '../../music/chordProgression';
 import { audioEngine } from '../../services/audioEngine';
 import { useSequenceBuilderStore } from '../../store/sequenceBuilderStore';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import styles from './SequenceBuilderPage.module.css';
 
 export default function SequenceBuilderPage() {
@@ -15,6 +16,8 @@ export default function SequenceBuilderPage() {
     clearSequence,
   } = useSequenceBuilderStore();
 
+  const { tempo } = usePreferencesStore();
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Get possible next chords based on draft
@@ -25,6 +28,33 @@ export default function SequenceBuilderPage() {
     const notes = chordToNotes(chord);
     if (notes.length > 0) {
       await audioEngine.playChord(notes, 4, '2n');
+    }
+  };
+
+  const handlePlaySequence = async () => {
+    // Calculate delay based on tempo
+    // For half note (2n) = 2 beats
+    // Beat duration = 60000ms / BPM
+    const beatDuration = 60000 / tempo;
+    const halfNoteDuration = beatDuration * 2;
+
+    // Play all saved chords
+    for (const state of savedSequence) {
+      if (state.chord) {
+        const notes = chordToNotes(state.chord);
+        if (notes.length > 0) {
+          await audioEngine.playChord(notes, 4, '2n');
+          await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
+        }
+      }
+    }
+
+    // Play draft chord if it exists
+    if (draft && draft.chord) {
+      const notes = chordToNotes(draft.chord);
+      if (notes.length > 0) {
+        await audioEngine.playChord(notes, 4, '2n');
+      }
     }
   };
 
@@ -51,6 +81,14 @@ export default function SequenceBuilderPage() {
           <div className={styles.sectionHeader}>
             <h2>Current Sequence</h2>
             <div className={styles.controls}>
+              {savedSequence.length > 0 && (
+                <button
+                  onClick={handlePlaySequence}
+                  className="btn btn-primary btn-sm"
+                >
+                  Play
+                </button>
+              )}
               <button
                 onClick={clearSequence}
                 className="btn btn-secondary btn-sm"
@@ -87,10 +125,18 @@ export default function SequenceBuilderPage() {
                         </div>
                         <div className={styles.modePlaceholders}>
                           <div className={styles.modePlaceholder}>
-                            Mode1: <span className={styles.placeholderText}>—</span>
+                            S1: {state.s1 ? (
+                              <span>{state.s1.root} {state.s1.scale}</span>
+                            ) : (
+                              <span className={styles.placeholderText}>—</span>
+                            )}
                           </div>
                           <div className={styles.modePlaceholder}>
-                            Mode2: <span className={styles.placeholderText}>—</span>
+                            S2: {state.s2 ? (
+                              <span>{state.s2.root} {state.s2.scale}</span>
+                            ) : (
+                              <span className={styles.placeholderText}>—</span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -102,7 +148,7 @@ export default function SequenceBuilderPage() {
                                 e.stopPropagation();
                                 saveDraft();
                               }}
-                              className="btn btn-primary btn-sm"
+                              className="btn btn-link btn-sm"
                             >
                               Save
                             </button>
@@ -113,7 +159,7 @@ export default function SequenceBuilderPage() {
                                 e.stopPropagation();
                                 moveToPrevious();
                               }}
-                              className="btn btn-secondary btn-sm"
+                              className="btn btn-link btn-sm"
                             >
                               &lt;
                             </button>
@@ -140,7 +186,7 @@ export default function SequenceBuilderPage() {
                 <div key={index} className={styles.chordOption}>
                   <button
                     onClick={() => handlePlayChord(chord)}
-                    className={styles.chordButton}
+                    className="btn btn-link"
                   >
                     {chord.displayName}
                   </button>
@@ -150,14 +196,14 @@ export default function SequenceBuilderPage() {
                         selectChord(chord);
                         saveDraft();
                       }}
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-link"
                       title="Add this chord and save"
                     >
                       Add
                     </button>
                     <button
                       onClick={() => selectChord(chord)}
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-ghost"
                       title="Replace draft chord without saving"
                     >
                       Replace

@@ -1,10 +1,14 @@
 import type { Chord } from './chordParser';
 import { parseChord } from './chordParser';
+import { calculateScaleNotes } from './notes';
+import { calculateTriads, getTriadAbbreviation } from './triads';
+import { getPitchClassFromNote } from './notes';
+import { useCatalogStore } from '../store/catalogStore';
 
 export interface ChordState {
   chord: Chord | null;
-  mode1?: string;
-  mode2?: string;
+  s1?: {scale: string; root: string};
+  s2?: {scale: string; root: string};
   saved?: boolean;
 }
 
@@ -13,23 +17,34 @@ export interface ChordSequence {
 }
 
 /**
- * Get possible next chords for a given state.
- * For now, returns all common chords without any rules.
+ * Get chords for a given scale using the catalog
  */
-export function getPossibleNextChords(state: ChordState): Chord[] {
-  // Common chord progression chords (no rules yet, just all possibilities)
-  const commonChordSymbols = [
-    'C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim',
-    'C7', 'Dm7', 'Em7', 'Fmaj7', 'G7', 'Am7', 'Bm7b5',
-    'D', 'Em', 'F#m', 'G', 'A', 'Bm', 'C#dim',
-    'E', 'F#m', 'G#m', 'A', 'B', 'C#m', 'D#dim',
-  ];
+function getChordsForScale(scaleName: string, root: string): Chord[] {
+  const catalogState = useCatalogStore.getState();
+  const { catalog } = catalogState;
 
-  // Parse all chords
+  if (!catalog) {
+    return [];
+  }
+
+  // Find scale type by name
+  const scaleType = catalog.scaleTypes.find(st =>
+    st.name.toLowerCase() === scaleName.toLowerCase()
+  );
+
+  if (!scaleType) {
+    return [];
+  }
+
+  const rootPitchClass = getPitchClassFromNote(root);
+  const scaleNotes = calculateScaleNotes(rootPitchClass, scaleType.intervals, true);
+  const triads = calculateTriads(scaleNotes, scaleType.intervals);
+
   const chords: Chord[] = [];
-  for (const symbol of commonChordSymbols) {
+  for (const triad of triads) {
+    const chordSymbol = getTriadAbbreviation(triad.root, triad.quality);
     try {
-      const chord = parseChord(symbol);
+      const chord = parseChord(chordSymbol);
       if (chord) {
         chords.push(chord);
       }
@@ -42,29 +57,44 @@ export function getPossibleNextChords(state: ChordState): Chord[] {
 }
 
 /**
+ * Get possible next chords for a given state.
+ * Filters by the current scale (s1).
+ */
+export function getPossibleNextChords(state: ChordState): Chord[] {
+  // Use s1 scale to filter chords
+  if (state.s1) {
+    return getChordsForScale(state.s1.scale, state.s1.root);
+  }
+
+  // Fallback to C Major if no scale is set
+  return getChordsForScale('Major', 'C');
+}
+
+/**
  * Create a new chord state
  */
-export function createChordState(chordSymbol: string | null, saved: boolean = false): ChordState {
+export function createChordState(chordSymbol: string | null, saved: boolean = false, s1?: {scale: string; root: string}): ChordState {
   const chord = chordSymbol ? parseChord(chordSymbol) : null;
   if (chordSymbol && !chord) {
     throw new Error(`Invalid chord symbol: ${chordSymbol}`);
   }
   return {
     chord,
-    mode1: undefined,
-    mode2: undefined,
+    s1: s1 || { scale: 'Major', root: 'C' },
+    s2: undefined,
     saved,
   };
 }
 
 /**
  * Create an empty chord state (no chord selected)
+ * Initializes with C Major scale
  */
 export function createEmptyChordState(): ChordState {
   return {
     chord: null,
-    mode1: undefined,
-    mode2: undefined,
+    s1: { scale: 'Major', root: 'C' },
+    s2: undefined,
     saved: false,
   };
 }
