@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Chord } from '../../music/chordParser';
 import { getPossibleNextChords, chordToNotes } from '../../music/chordProgression';
 import { audioEngine } from '../../services/audioEngine';
 import { useSequenceBuilderStore } from '../../store/sequenceBuilderStore';
 import { usePreferencesStore } from '../../store/preferencesStore';
+import { useCatalogStore } from '../../store/catalogStore';
+import ScaleTable from '../../components/ScaleTable';
 import styles from './SequenceBuilderPage.module.css';
 
 export default function SequenceBuilderPage() {
@@ -16,7 +18,10 @@ export default function SequenceBuilderPage() {
     clearSequence,
   } = useSequenceBuilderStore();
 
-  const { tempo } = usePreferencesStore();
+  const { tempo, accidentalPreference } = usePreferencesStore();
+  const { catalog } = useCatalogStore();
+
+  const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +61,24 @@ export default function SequenceBuilderPage() {
         await audioEngine.playChord(notes, 4, '2n');
       }
     }
+  };
+
+  const handleSelectScale = (scaleName: string, root: string) => {
+    // Update draft's s1 field with the selected scale
+    useSequenceBuilderStore.setState((state) => ({
+      draft: state.draft
+        ? { ...state.draft, s1: { scale: scaleName, root } }
+        : null,
+    }));
+  };
+
+  const handleSelectScale2 = (scaleName: string, root: string) => {
+    // Update draft's s2 field with the selected scale
+    useSequenceBuilderStore.setState((state) => ({
+      draft: state.draft
+        ? { ...state.draft, s2: { scale: scaleName, root } }
+        : null,
+    }));
   };
 
   // Combine saved sequence and draft for display
@@ -174,13 +197,32 @@ export default function SequenceBuilderPage() {
           </div>
         </div>
 
-        {/* Chord Selector */}
-        {(
-          <div className={styles.selectorSection}>
-            <div className={styles.sectionHeader}>
-              <h2>Select Chord</h2>
+        {/* Selector with Tabs */}
+        <div className={styles.selectorSection}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.tabs}>
+              <button
+                className={`${styles.tab} ${activeTab === 'chord' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('chord')}
+              >
+                Select Chord
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === 'scale' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('scale')}
+              >
+                Select Scale
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === 'scale2' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('scale2')}
+              >
+                Select Scale 2
+              </button>
             </div>
+          </div>
 
+          {activeTab === 'chord' && (
             <div className={styles.chordGrid}>
               {possibleChords.map((chord, index) => (
                 <div key={index} className={styles.chordOption}>
@@ -212,8 +254,26 @@ export default function SequenceBuilderPage() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+
+          {activeTab === 'scale' && catalog && (
+            <ScaleTable
+              catalog={catalog}
+              selectedScale={draft?.s1}
+              onSelectScale={handleSelectScale}
+              accidentalPreference={accidentalPreference}
+            />
+          )}
+
+          {activeTab === 'scale2' && catalog && (
+            <ScaleTable
+              catalog={catalog}
+              selectedScale={draft?.s2}
+              onSelectScale={handleSelectScale2}
+              accidentalPreference={accidentalPreference}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
