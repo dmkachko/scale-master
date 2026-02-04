@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Chord } from '../../music/chordParser';
-import { getPossibleNextChords, chordToNotes } from '../../music/chordProgression';
+import { chordToNotes } from '../../music/chordProgression';
 import { audioEngine } from '../../services/audioEngine';
 import { useSequenceBuilderStore } from '../../store/sequenceBuilderStore';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { useCatalogStore } from '../../store/catalogStore';
+import { useCatalogInit } from '../../hooks/useCatalogInit';
 import ScaleTable from '../../components/ScaleTable';
+import ChordTable from '../../components/ChordTable';
 import styles from './SequenceBuilderPage.module.css';
 
 export default function SequenceBuilderPage() {
+  useCatalogInit();
+
   const {
     savedSequence,
     draft,
@@ -24,9 +28,6 @@ export default function SequenceBuilderPage() {
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Get possible next chords based on draft
-  const possibleChords = getPossibleNextChords(draft!);
 
   const handlePlayChord = async (chord: Chord | null) => {
     if (!chord) return;
@@ -77,6 +78,35 @@ export default function SequenceBuilderPage() {
     useSequenceBuilderStore.setState((state) => ({
       draft: state.draft
         ? { ...state.draft, s2: { scale: scaleName, root } }
+        : null,
+    }));
+  };
+
+  const handleAddChord = (chord: Chord) => {
+    selectChord(chord);
+    saveDraft();
+  };
+
+  const handleClearDraftChord = () => {
+    useSequenceBuilderStore.setState((state) => ({
+      draft: state.draft
+        ? { ...state.draft, chord: null }
+        : null,
+    }));
+  };
+
+  const handleClearS1 = () => {
+    useSequenceBuilderStore.setState((state) => ({
+      draft: state.draft
+        ? { ...state.draft, s1: undefined }
+        : null,
+    }));
+  };
+
+  const handleClearS2 = () => {
+    useSequenceBuilderStore.setState((state) => ({
+      draft: state.draft
+        ? { ...state.draft, s2: undefined }
         : null,
     }));
   };
@@ -137,28 +167,70 @@ export default function SequenceBuilderPage() {
                     >
                       <div className={styles.stateNumber}>{index + 1}</div>
                       <div className={styles.stateContent}>
-                        <div
-                          className={`${styles.chordDisplay} ${!state.chord ? styles.emptyChord : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlayChord(state.chord);
-                          }}
-                        >
-                          {state.chord ? state.chord.displayName : '—'}
+                        <div className={styles.chordRow}>
+                          <div
+                            className={`${styles.chordDisplay} ${!state.chord ? styles.emptyChord : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlayChord(state.chord);
+                            }}
+                          >
+                            {state.chord ? state.chord.displayName : '—'}
+                          </div>
+                          {isDraft && state.chord && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleClearDraftChord();
+                              }}
+                              className={styles.clearChordButton}
+                              title="Clear chord selection"
+                            >
+                              ×
+                            </button>
+                          )}
                         </div>
                         <div className={styles.modePlaceholders}>
                           <div className={styles.modePlaceholder}>
-                            S1: {state.s1 ? (
-                              <span>{state.s1.root} {state.s1.scale}</span>
-                            ) : (
-                              <span className={styles.placeholderText}>—</span>
+                            <span className={styles.scaleLabel}>
+                              S1: {state.s1 ? (
+                                <span>{state.s1.root} {state.s1.scale}</span>
+                              ) : (
+                                <span className={styles.placeholderText}>—</span>
+                              )}
+                            </span>
+                            {isDraft && state.s1 && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClearS1();
+                                }}
+                                className={styles.clearScaleButton}
+                                title="Clear scale 1"
+                              >
+                                ×
+                              </button>
                             )}
                           </div>
                           <div className={styles.modePlaceholder}>
-                            S2: {state.s2 ? (
-                              <span>{state.s2.root} {state.s2.scale}</span>
-                            ) : (
-                              <span className={styles.placeholderText}>—</span>
+                            <span className={styles.scaleLabel}>
+                              S2: {state.s2 ? (
+                                <span>{state.s2.root} {state.s2.scale}</span>
+                              ) : (
+                                <span className={styles.placeholderText}>—</span>
+                              )}
+                            </span>
+                            {isDraft && state.s2 && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClearS2();
+                                }}
+                                className={styles.clearScaleButton}
+                                title="Clear scale 2"
+                              >
+                                ×
+                              </button>
                             )}
                           </div>
                         </div>
@@ -223,37 +295,14 @@ export default function SequenceBuilderPage() {
           </div>
 
           {activeTab === 'chord' && (
-            <div className={styles.chordGrid}>
-              {possibleChords.map((chord, index) => (
-                <div key={index} className={styles.chordOption}>
-                  <button
-                    onClick={() => handlePlayChord(chord)}
-                    className="btn btn-link"
-                  >
-                    {chord.displayName}
-                  </button>
-                  <div className={styles.chordActions}>
-                    <button
-                      onClick={() => {
-                        selectChord(chord);
-                        saveDraft();
-                      }}
-                      className="btn btn-link"
-                      title="Add this chord and save"
-                    >
-                      Add
-                    </button>
-                    <button
-                      onClick={() => selectChord(chord)}
-                      className="btn btn-ghost"
-                      title="Replace draft chord without saving"
-                    >
-                      Replace
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ChordTable
+              selectedChord={draft?.chord}
+              onSelectChord={selectChord}
+              onAddChord={handleAddChord}
+              accidentalPreference={accidentalPreference}
+              selectedScales={[draft?.s1, draft?.s2].filter((s): s is { scale: string; root: string } => s != null)}
+              scaleTypes={catalog?.scaleTypes}
+            />
           )}
 
           {activeTab === 'scale' && catalog && (

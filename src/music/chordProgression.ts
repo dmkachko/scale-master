@@ -80,7 +80,7 @@ export function createChordState(chordSymbol: string | null, saved: boolean = fa
   }
   return {
     chord,
-    s1: s1 || { scale: 'Major', root: 'C' },
+    s1,
     s2: undefined,
     saved,
   };
@@ -88,12 +88,11 @@ export function createChordState(chordSymbol: string | null, saved: boolean = fa
 
 /**
  * Create an empty chord state (no chord selected)
- * Initializes with C Major scale
  */
 export function createEmptyChordState(): ChordState {
   return {
     chord: null,
-    s1: { scale: 'Major', root: 'C' },
+    s1: undefined,
     s2: undefined,
     saved: false,
   };

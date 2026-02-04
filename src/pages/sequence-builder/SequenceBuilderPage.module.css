@@ -112,12 +112,19 @@
   gap: var(--spacing-md);
 }
 
+.chordRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
 .chordDisplay {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   cursor: pointer;
   user-select: none;
+  flex: 1;
 }
 
 .chordDisplay:hover {
@@ -134,6 +141,29 @@
   color: var(--color-text-tertiary);
 }
 
+.clearChordButton {
+  background: none;
+  border: none;
+  color: var(--color-error-text);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  line-height: 1;
+}
+
+.clearChordButton:hover {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
 .modePlaceholders {
   display: flex;
   flex-direction: column;
@@ -143,11 +173,41 @@
 
 .modePlaceholder {
   color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.scaleLabel {
+  flex: 1;
 }
 
 .placeholderText {
   color: var(--color-text-tertiary);
   font-style: italic;
+}
+
+.clearScaleButton {
+  background: none;
+  border: none;
+  color: var(--color-error-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+  line-height: 1;
+}
+
+.clearScaleButton:hover {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
 }
 
 .cellControls {
@@ -166,43 +226,6 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   border: 1px solid var(--color-border-primary);
-}
-
-.chordGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-.chordOption {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm);
-  background: var(--color-bg-primary);
-  transition: border-color var(--transition-base);
-}
-
-.chordOption:hover {
-  border-color: var(--color-border-secondary);
-}
-
-.chordOption .btn-link {
-  font-size: var(--font-size-md);
-  padding: var(--spacing-md);
-}
-
-.chordActions {
-  display: flex;
-  gap: var(--spacing-xs);
-}
-
-.chordActions button {
-  flex: 1;
-  font-size: var(--font-size-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 /* Tabs */

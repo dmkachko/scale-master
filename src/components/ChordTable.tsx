@@ -1,0 +1,113 @@
+import { useMemo } from 'react';
+import { parseChord, type Chord } from '../music/chordParser';
+import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../music/notes';
+import { chordFitsInAllScales } from '../music/chordScaleChecker';
+import type { ScaleType } from '../types/catalog';
+import styles from './ChordTable.module.css';
+
+interface ChordTableProps {
+  selectedChord?: Chord | null;
+  onSelectChord: (chord: Chord) => void;
+  onAddChord?: (chord: Chord) => void;
+  accidentalPreference: 'sharps' | 'flats';
+  selectedScales?: Array<{ scale: string; root: string }>;
+  scaleTypes?: ScaleType[];
+}
+
+// Chord quality groups
+const CHORD_GROUPS = {
+  'Triads': ['', 'm', 'dim', 'aug', 'sus2', 'sus4'],
+  'Seventh Chords': ['maj7', 'm7', '7', 'dim7', 'm7b5', 'mmaj7', 'aug7', '7sus4'],
+  'Sixth Chords': ['6', 'm6'],
+};
+
+const QUALITY_LABELS: Record<string, string> = {
+  '': 'Major',
+  'm': 'Minor',
+  'dim': 'Diminished',
+  'aug': 'Augmented',
+  'sus2': 'Sus2',
+  'sus4': 'Sus4',
+  'maj7': 'Major 7th',
+  'm7': 'Minor 7th',
+  '7': 'Dominant 7th',
+  'dim7': 'Diminished 7th',
+  'm7b5': 'Half Diminished',
+  'mmaj7': 'Minor Major 7th',
+  'aug7': 'Augmented 7th',
+  '7sus4': '7sus4',
+  '6': 'Major 6th',
+  'm6': 'Minor 6th',
+};
+
+export default function ChordTable({
+  selectedChord,
+  onSelectChord,
+  onAddChord,
+  accidentalPreference,
+  selectedScales = [],
+  scaleTypes = [],
+}: ChordTableProps) {
+  const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
+
+  // Generate chords for each quality and root
+  const generateChord = (root: string, quality: string): Chord | null => {
+    const chordSymbol = `${root}${quality}`;
+    return parseChord(chordSymbol);
+  };
+
+  // Check if a chord should be shown based on scale filter
+  // Chord must fit in ALL selected scales (AND logic)
+  const shouldShowChord = (chord: Chord | null): boolean => {
+    if (!chord) return false;
+    if (selectedScales.length === 0) return true;
+    return chordFitsInAllScales(chord, selectedScales, scaleTypes);
+  };
+
+  return (
+    <div className={styles.chordTableWrapper}>
+      {Object.entries(CHORD_GROUPS).map(([groupName, qualities]) => (
+        <div key={groupName} className={styles.chordGroup}>
+          <h3 className={styles.groupHeader}>{groupName}</h3>
+          <table className={styles.chordTable}>
+            <tbody>
+              {qualities.map((quality) => (
+                <tr key={quality}>
+                  <td className={styles.chordTypeCell}>
+                    {QUALITY_LABELS[quality] || quality}
+                  </td>
+                  {noteNames.map((root) => {
+                    const chord = generateChord(root, quality);
+                    if (!chord) return <td key={root} className={styles.chordCell}></td>;
+
+                    const fitsInScale = shouldShowChord(chord);
+                    const isSelected =
+                      selectedChord?.displayName === chord.displayName;
+
+                    return (
+                      <td key={root} className={styles.chordCell}>
+                        <button
+                          onClick={() => fitsInScale && onSelectChord(chord)}
+                          onDoubleClick={() => fitsInScale && onAddChord?.(chord)}
+                          className={`${styles.chordCellButton} ${isSelected ? styles.selectedChordCell : ''} ${!fitsInScale ? styles.disabledChordCell : ''}`}
+                          disabled={!fitsInScale}
+                          title={
+                            fitsInScale
+                              ? `${chord.displayName}${onAddChord ? ' (double-click to add)' : ''}`
+                              : `${chord.displayName} (not in selected scale)`
+                          }
+                        >
+                          {root}
+                        </button>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+}
