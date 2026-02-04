@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import type { Catalog } from '../types/catalog';
+import type { Chord } from '../music/chordParser';
 import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../music/notes';
+import { chordFitsInScale } from '../music/chordScaleChecker';
 import styles from './ScaleTable.module.css';
 
 interface ScaleTableProps {
@@ -8,6 +10,7 @@ interface ScaleTableProps {
   selectedScale?: { scale: string; root: string };
   onSelectScale: (scaleName: string, root: string) => void;
   accidentalPreference: 'sharps' | 'flats';
+  selectedChord?: Chord | null;
 }
 
 const FAMILY_LABELS: Record<string, string> = {
@@ -27,8 +30,18 @@ export default function ScaleTable({
   selectedScale,
   onSelectScale,
   accidentalPreference,
+  selectedChord,
 }: ScaleTableProps) {
   const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
+
+  // Check if a scale should be shown based on chord filter
+  const shouldShowScale = (scaleTypeName: string, root: string): boolean => {
+    if (!selectedChord) return true;
+    if (!selectedChord.pitchClasses) return true; // Safety check
+    const scaleType = catalog.scaleTypes.find(st => st.name === scaleTypeName);
+    if (!scaleType) return false;
+    return chordFitsInScale(selectedChord, root, scaleType.intervals);
+  };
 
   // Group scales by family
   const scalesByFamily = useMemo(() => {
@@ -83,12 +96,18 @@ export default function ScaleTable({
                       const isSelected =
                         selectedScale?.scale === scaleType.name &&
                         selectedScale?.root === root;
+                      const fitsChord = shouldShowScale(scaleType.name, root);
                       return (
                         <td key={root} className={styles.scaleCell}>
                           <button
-                            onClick={() => onSelectScale(scaleType.name, root)}
-                            className={`${styles.scaleCellButton} ${isSelected ? styles.selectedScaleCell : ''}`}
-                            title={`${root} ${scaleType.name}`}
+                            onClick={() => fitsChord && onSelectScale(scaleType.name, root)}
+                            className={`${styles.scaleCellButton} ${isSelected ? styles.selectedScaleCell : ''} ${!fitsChord ? styles.disabledScaleCell : ''}`}
+                            disabled={!fitsChord}
+                            title={
+                              fitsChord
+                                ? `${root} ${scaleType.name}`
+                                : `${root} ${scaleType.name} (chord not in scale)`
+                            }
                           >
                             {root}
                           </button>

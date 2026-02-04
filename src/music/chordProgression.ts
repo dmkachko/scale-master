@@ -103,6 +103,15 @@ export function createEmptyChordState(): ChordState {
  */
 export function chordToNotes(chord: Chord | null): string[] {
   if (!chord) return [];
+
+  // Check if pitchClasses is valid (might be empty after deserialization)
+  if (!chord.pitchClasses || !(chord.pitchClasses instanceof Set) || chord.pitchClasses.size === 0) {
+    // Reconstruct chord from displayName
+    const reconstructed = parseChord(chord.displayName);
+    if (!reconstructed) return [];
+    chord = reconstructed;
+  }
+
   const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   return Array.from(chord.pitchClasses).map(pc => noteNames[pc]);
 }

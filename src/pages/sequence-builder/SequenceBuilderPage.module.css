@@ -100,6 +100,22 @@
   border-color: var(--color-success-text);
 }
 
+.playingCard {
+  border-color: var(--color-brand-primary);
+  background: var(--color-bg-brand-subtle);
+  box-shadow: 0 0 0 3px var(--color-brand-primary), var(--shadow-brand);
+  animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
 .stateNumber {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);

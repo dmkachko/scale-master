@@ -35,12 +35,19 @@ export function getScalePitchClasses(
  * @returns true if all chord notes are in the scale
  */
 export function chordFitsInScale(
-  chord: Chord | Set<number>,
+  chord: Chord | Set<number> | null | undefined,
   scaleRoot: string | number,
   scaleIntervals: number[]
 ): boolean {
+  if (!chord) return true; // No chord to check, consider it fits
+
   const scalePitchClasses = getScalePitchClasses(scaleRoot, scaleIntervals);
   const chordPitchClasses = chord instanceof Set ? chord : chord.pitchClasses;
+
+  if (!chordPitchClasses) return true; // No pitch classes to check
+  if (!(chordPitchClasses instanceof Set) && !Array.isArray(chordPitchClasses)) {
+    return true; // Invalid format, don't filter
+  }
 
   // Check if all chord pitch classes are in the scale
   for (const chordPC of chordPitchClasses) {

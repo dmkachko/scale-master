@@ -55,10 +55,13 @@ export const useSequenceBuilderStore = create<SequenceBuilderState>()(
         selectChord: (chord) =>
           set(
             (state) => {
-              // Update draft with selected chord, preserving s1
+              // Update draft with selected chord, preserving s1 and s2
               if (state.draft !== null) {
+                const newDraft = createChordState(chord.displayName, false, state.draft.s1);
+                // Preserve s2 as well
+                newDraft.s2 = state.draft.s2;
                 return {
-                  draft: createChordState(chord.displayName, false, state.draft.s1),
+                  draft: newDraft,
                   selectedChord: chord,
                 };
               }
@@ -74,9 +77,16 @@ export const useSequenceBuilderStore = create<SequenceBuilderState>()(
               if (state.draft !== null && state.draft.chord !== null) {
                 // Move draft to saved sequence
                 const savedDraft = { ...state.draft, saved: true };
+                // Create new draft preserving scale selections
+                const newDraft = {
+                  chord: null,
+                  s1: state.draft.s1,
+                  s2: state.draft.s2,
+                  saved: false,
+                };
                 return {
                   savedSequence: [...state.savedSequence, savedDraft],
-                  draft: createEmptyChordState(), // Create new empty draft
+                  draft: newDraft,
                   selectedChord: null,
                 };
               }

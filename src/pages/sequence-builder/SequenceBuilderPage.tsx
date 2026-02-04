@@ -26,6 +26,7 @@ export default function SequenceBuilderPage() {
   const { catalog } = useCatalogStore();
 
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -38,29 +39,41 @@ export default function SequenceBuilderPage() {
   };
 
   const handlePlaySequence = async () => {
-    // Calculate delay based on tempo
-    // For half note (2n) = 2 beats
-    // Beat duration = 60000ms / BPM
-    const beatDuration = 60000 / tempo;
-    const halfNoteDuration = beatDuration * 2;
+    try {
+      // Calculate delay based on tempo
+      // For half note (2n) = 2 beats
+      // Beat duration = 60000ms / BPM
+      const beatDuration = 60000 / tempo;
+      const halfNoteDuration = beatDuration * 2;
 
-    // Play all saved chords
-    for (const state of savedSequence) {
-      if (state.chord) {
-        const notes = chordToNotes(state.chord);
+      // Play all saved chords
+      for (let i = 0; i < savedSequence.length; i++) {
+        setPlayingIndex(i); // Highlight current chord
+        const state = savedSequence[i];
+
+        if (state.chord) {
+          const notes = chordToNotes(state.chord);
+          if (notes.length > 0) {
+            await audioEngine.playChord(notes, 4, '2n');
+            await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
+          }
+        }
+      }
+
+      // Play draft chord if it exists
+      if (draft && draft.chord) {
+        setPlayingIndex(savedSequence.length); // Highlight draft
+        const notes = chordToNotes(draft.chord);
         if (notes.length > 0) {
           await audioEngine.playChord(notes, 4, '2n');
           await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
         }
       }
-    }
 
-    // Play draft chord if it exists
-    if (draft && draft.chord) {
-      const notes = chordToNotes(draft.chord);
-      if (notes.length > 0) {
-        await audioEngine.playChord(notes, 4, '2n');
-      }
+      setPlayingIndex(null); // Clear highlight when done
+    } catch (error) {
+      console.error('Error playing sequence:', error);
+      setPlayingIndex(null); // Clear highlight on error
     }
   };
 
@@ -163,13 +176,16 @@ export default function SequenceBuilderPage() {
                 {allCells.map((state, index) => {
                   const isDraft = index === allCells.length - 1; // Last cell is always draft
                   const isSaved = state.saved;
+                  const isPlaying = playingIndex === index;
 
                   return (
                     <div
                       key={index}
                       className={`${styles.stateCard} ${
                         isDraft ? styles.currentCard : ''
-                      } ${isSaved ? styles.savedCard : ''}`}
+                      } ${isSaved ? styles.savedCard : ''} ${
+                        isPlaying ? styles.playingCard : ''
+                      }`}
                     >
                       <div className={styles.stateNumber}>{index + 1}</div>
                       <div className={styles.stateContent}>
@@ -323,6 +339,7 @@ export default function SequenceBuilderPage() {
               selectedScale={draft?.s1}
               onSelectScale={handleSelectScale}
               accidentalPreference={accidentalPreference}
+              selectedChord={draft?.chord}
             />
           )}
 
@@ -332,6 +349,7 @@ export default function SequenceBuilderPage() {
               selectedScale={draft?.s2}
               onSelectScale={handleSelectScale2}
               accidentalPreference={accidentalPreference}
+              selectedChord={draft?.chord}
             />
           )}
         </div>
