@@ -30,11 +30,20 @@ export default function SequenceBuilderPage() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Get bass note for a chord (currently root, can be changed for inversions)
+  const getBassNote = (chord: Chord): string => {
+    // Currently using root note as bass
+    // Future: could use chord.bass if inversions are implemented
+    return `${chord.root}2`; // Two octaves below (chord is at octave 4)
+  };
+
   const handlePlayChord = async (chord: Chord | null) => {
     if (!chord) return;
     const notes = chordToNotes(chord);
     if (notes.length > 0) {
-      await audioEngine.playChord(notes, 4, '2n');
+      const bassNote = getBassNote(chord);
+      const chordNotes = notes.map(note => `${note}4`);
+      await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
     }
   };
 
@@ -54,7 +63,9 @@ export default function SequenceBuilderPage() {
         if (state.chord) {
           const notes = chordToNotes(state.chord);
           if (notes.length > 0) {
-            await audioEngine.playChord(notes, 4, '2n');
+            const bassNote = getBassNote(state.chord);
+            const chordNotes = notes.map(note => `${note}4`);
+            await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
             await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
           }
         }
@@ -65,7 +76,9 @@ export default function SequenceBuilderPage() {
         setPlayingIndex(savedSequence.length); // Highlight draft
         const notes = chordToNotes(draft.chord);
         if (notes.length > 0) {
-          await audioEngine.playChord(notes, 4, '2n');
+          const bassNote = getBassNote(draft.chord);
+          const chordNotes = notes.map(note => `${note}4`);
+          await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
           await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
         }
       }
