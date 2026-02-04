@@ -84,8 +84,14 @@ export default function SequenceBuilderPage() {
 
   const handleAddChord = (chord: Chord) => {
     selectChord(chord);
-    saveDraft();
+    // Only save if at least one scale is selected
+    if (draft?.s1 || draft?.s2) {
+      saveDraft();
+    }
   };
+
+  // Check if draft can be saved (has chord and at least one scale)
+  const canSaveDraft = draft?.chord && (draft?.s1 || draft?.s2);
 
   const handleClearDraftChord = () => {
     useSequenceBuilderStore.setState((state) => ({
@@ -244,6 +250,12 @@ export default function SequenceBuilderPage() {
                                 saveDraft();
                               }}
                               className="btn btn-link btn-sm"
+                              disabled={!canSaveDraft}
+                              title={
+                                !canSaveDraft
+                                  ? 'Select at least one scale to save'
+                                  : 'Save this chord to the sequence'
+                              }
                             >
                               Save
                             </button>
