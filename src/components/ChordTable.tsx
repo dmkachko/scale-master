@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Save } from 'lucide-react';
 import { parseChord, type Chord } from '../music/chordParser';
 import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../music/notes';
 import { chordFitsInAllScales } from '../music/chordScaleChecker';
@@ -9,6 +10,8 @@ interface ChordTableProps {
   selectedChord?: Chord | null;
   onSelectChord: (chord: Chord) => void;
   onAddChord?: (chord: Chord) => void;
+  onSaveDraft?: () => void;
+  canSaveDraft?: boolean;
   accidentalPreference: 'sharps' | 'flats';
   selectedScales?: Array<{ scale: string; root: string }>;
   scaleTypes?: ScaleType[];
@@ -44,6 +47,8 @@ export default function ChordTable({
   selectedChord,
   onSelectChord,
   onAddChord,
+  onSaveDraft,
+  canSaveDraft = false,
   accidentalPreference,
   selectedScales = [],
   scaleTypes = [],
@@ -86,19 +91,34 @@ export default function ChordTable({
 
                     return (
                       <td key={root} className={styles.chordCell}>
-                        <button
-                          onClick={() => fitsInScale && onSelectChord(chord)}
-                          onDoubleClick={() => fitsInScale && onAddChord?.(chord)}
-                          className={`${styles.chordCellButton} ${isSelected ? styles.selectedChordCell : ''} ${!fitsInScale ? styles.disabledChordCell : ''}`}
-                          disabled={!fitsInScale}
-                          title={
-                            fitsInScale
-                              ? `${chord.displayName}${onAddChord ? ' (double-click to add)' : ''}`
-                              : `${chord.displayName} (not in selected scale)`
-                          }
-                        >
-                          {root}
-                        </button>
+                        <div className={styles.chordCellContainer}>
+                          <button
+                            onClick={() => fitsInScale && onSelectChord(chord)}
+                            onDoubleClick={() => fitsInScale && onAddChord?.(chord)}
+                            className={`${styles.chordCellButton} ${isSelected ? styles.selectedChordCell : ''} ${!fitsInScale ? styles.disabledChordCell : ''}`}
+                            disabled={!fitsInScale}
+                            title={
+                              fitsInScale
+                                ? `${chord.displayName}${onAddChord ? ' (double-click to add)' : ''}`
+                                : `${chord.displayName} (not in selected scale)`
+                            }
+                          >
+                            {root}
+                          </button>
+                          {isSelected && onSaveDraft && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSaveDraft();
+                              }}
+                              className={styles.saveButton}
+                              disabled={!canSaveDraft}
+                              title={canSaveDraft ? 'Save to sequence' : 'Select at least one scale to save'}
+                            >
+                              <Save size={14} />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     );
                   })}

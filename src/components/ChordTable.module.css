@@ -62,6 +62,14 @@
 .chordCell {
   text-align: center;
   padding: 0;
+  position: relative;
+}
+
+.chordCellContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .chordCellButton {
@@ -98,4 +106,33 @@
   background: none;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-normal);
+}
+
+.saveButton {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  background: var(--color-brand-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity var(--transition-base);
+}
+
+.saveButton:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.saveButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }

@@ -29,6 +29,7 @@ export default function SequenceBuilderPage() {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const playbackCancelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
 
   // Get bass note for a chord (currently root, can be changed for inversions)
   const getBassNote = (chord: Chord): string => {
@@ -108,7 +109,7 @@ export default function SequenceBuilderPage() {
     }));
   };
 
-  const playChordWithPrevious = async (chord: Chord) => {
+  const playChordWithPrevious = async (chord: Chord, cancelToken: { cancelled: boolean }) => {
     // Play previous chords + current chord
     const beatDuration = 60000 / tempo;
     const halfNoteDuration = beatDuration * 2;
@@ -118,6 +119,8 @@ export default function SequenceBuilderPage() {
 
     // Play previous chords
     for (const state of previousChords) {
+      if (cancelToken.cancelled) return; // Stop if cancelled
+
       if (state.chord) {
         const notes = chordToNotes(state.chord);
         if (notes.length > 0) {
@@ -129,6 +132,8 @@ export default function SequenceBuilderPage() {
       }
     }
 
+    if (cancelToken.cancelled) return; // Stop if cancelled
+
     // Play the newly selected chord
     const notes = chordToNotes(chord);
     if (notes.length > 0) {
@@ -138,18 +143,35 @@ export default function SequenceBuilderPage() {
     }
   };
 
-  const handleSelectChord = async (chord: Chord) => {
-    // Play previous chords + current
-    await playChordWithPrevious(chord);
-    // Update selection
+  const handleSelectChord = (chord: Chord) => {
+    // Cancel any ongoing playback
+    playbackCancelRef.current.cancelled = true;
+
+    // Create new cancel token for this playback
+    const cancelToken = { cancelled: false };
+    playbackCancelRef.current = cancelToken;
+
+    // Update selection immediately (don't wait for playback)
     selectChord(chord);
+
+    // Start playback async (non-blocking)
+    playChordWithPrevious(chord, cancelToken);
   };
 
-  const handleAddChord = async (chord: Chord) => {
-    // Play previous chords + current
-    await playChordWithPrevious(chord);
-    // Update selection
+  const handleAddChord = (chord: Chord) => {
+    // Cancel any ongoing playback
+    playbackCancelRef.current.cancelled = true;
+
+    // Create new cancel token for this playback
+    const cancelToken = { cancelled: false };
+    playbackCancelRef.current = cancelToken;
+
+    // Update selection immediately
     selectChord(chord);
+
+    // Start playback async (non-blocking)
+    playChordWithPrevious(chord, cancelToken);
+
     // Only save if at least one scale is selected
     if (draft?.s1 || draft?.s2) {
       saveDraft();
@@ -380,6 +402,8 @@ export default function SequenceBuilderPage() {
               selectedChord={draft?.chord}
               onSelectChord={handleSelectChord}
               onAddChord={handleAddChord}
+              onSaveDraft={saveDraft}
+              canSaveDraft={canSaveDraft}
               accidentalPreference={accidentalPreference}
               selectedScales={[draft?.s1, draft?.s2].filter((s): s is { scale: string; root: string } => s != null)}
               scaleTypes={catalog?.scaleTypes}
