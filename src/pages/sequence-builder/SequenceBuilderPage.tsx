@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import type { Chord } from '../../music/chordParser';
 import { chordToNotes } from '../../music/chordProgression';
 import { audioEngine } from '../../services/audioEngine';
@@ -234,6 +235,15 @@ export default function SequenceBuilderPage() {
                   className="btn btn-primary btn-sm"
                 >
                   Play
+                </button>
+              )}
+              {savedSequence.length > 0 && (
+                <button
+                  onClick={moveToPrevious}
+                  className="btn btn-secondary btn-sm"
+                  title="Delete last saved chord"
+                >
+                  <Trash2 size={16} />
                 </button>
               )}
               <button
