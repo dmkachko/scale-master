@@ -69,65 +69,72 @@ export default function ChordTable({
     return chordFitsInAllScales(chord, selectedScales, scaleTypes);
   };
 
+  // Generate all chords grouped by root note
+  const chordsByRoot = useMemo(() => {
+    const result: Record<string, Chord[]> = {};
+
+    noteNames.forEach((root) => {
+      const chords: Chord[] = [];
+
+      // Generate all chord qualities for this root
+      Object.values(CHORD_GROUPS).flat().forEach((quality) => {
+        const chord = generateChord(root, quality);
+        if (chord && shouldShowChord(chord)) {
+          chords.push(chord);
+        }
+      });
+
+      // Only include root if it has chords
+      if (chords.length > 0) {
+        result[root] = chords;
+      }
+    });
+
+    return result;
+  }, [noteNames, selectedScales, scaleTypes]);
+
   return (
     <div className={styles.chordTableWrapper}>
-      {Object.entries(CHORD_GROUPS).map(([groupName, qualities]) => (
-        <div key={groupName} className={styles.chordGroup}>
-          <h3 className={styles.groupHeader}>{groupName}</h3>
-          <table className={styles.chordTable}>
-            <tbody>
-              {qualities.map((quality) => (
-                <tr key={quality}>
-                  <td className={styles.chordTypeCell}>
-                    {QUALITY_LABELS[quality] || quality}
-                  </td>
-                  {noteNames.map((root) => {
-                    const chord = generateChord(root, quality);
-                    if (!chord) return <td key={root} className={styles.chordCell}></td>;
+      {Object.entries(chordsByRoot).map(([root, chords]) => (
+        <div key={root} className={styles.rootGroup}>
+          <div className={styles.chordPills}>
+            {chords.map((chord) => {
+              const isSelected = selectedChord?.displayName === chord.displayName;
 
-                    const fitsInScale = shouldShowChord(chord);
-                    const isSelected =
-                      selectedChord?.displayName === chord.displayName;
-
-                    return (
-                      <td key={root} className={styles.chordCell}>
-                        <div className={styles.chordCellContainer}>
-                          <button
-                            onClick={() => fitsInScale && onSelectChord(chord)}
-                            onDoubleClick={() => fitsInScale && onAddChord?.(chord)}
-                            className={`${styles.chordCellButton} ${isSelected ? styles.selectedChordCell : ''} ${!fitsInScale ? styles.disabledChordCell : ''}`}
-                            disabled={!fitsInScale}
-                            title={
-                              fitsInScale
-                                ? `${chord.displayName}${onAddChord ? ' (double-click to add)' : ''}`
-                                : `${chord.displayName} (not in selected scale)`
-                            }
-                          >
-                            {root}
-                          </button>
-                          {isSelected && onSaveDraft && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onSaveDraft();
-                              }}
-                              className={styles.saveButton}
-                              disabled={!canSaveDraft}
-                              title={canSaveDraft ? 'Save to sequence' : 'Select at least one scale to save'}
-                            >
-                              <Save size={14} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              return (
+                <div key={chord.displayName} className={styles.chordPillContainer}>
+                  <button
+                    onClick={() => onSelectChord(chord)}
+                    onDoubleClick={() => onAddChord?.(chord)}
+                    className={`${styles.chordPill} ${isSelected ? styles.selectedPill : ''}`}
+                    title={`${chord.displayName}${onAddChord ? ' (double-click to add)' : ''}`}
+                  >
+                    {chord.displayName}
+                  </button>
+                  {isSelected && onSaveDraft && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSaveDraft();
+                      }}
+                      className={styles.saveLink}
+                      disabled={!canSaveDraft}
+                      title={canSaveDraft ? 'Save to sequence' : 'Select at least one scale to save'}
+                    >
+                      <Save size={14} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       ))}
+      {Object.keys(chordsByRoot).length === 0 && (
+        <div className={styles.noChords}>
+          No chords match the selected scales
+        </div>
+      )}
     </div>
   );
 }
