@@ -25,6 +25,7 @@ interface PreferencesState {
   timeSignature: TimeSignature;
   tempo: number; // BPM
   playbackPattern: ScalePattern;
+  chordSelectionPlaybackCount: number; // How many previous chords to play on selection
 
   // Synth settings
   activeSynthType: SynthType;
@@ -44,6 +45,7 @@ interface PreferencesState {
   setActiveSynthType: (type: SynthType) => void;
   setSynthVolume: (type: SynthType, volume: number) => void;
   setVelocity: (type: 'normal' | 'accented', velocity: number) => void;
+  setChordSelectionPlaybackCount: (count: number) => void;
 }
 
 export const usePreferencesStore = create<PreferencesState>()(
@@ -55,6 +57,7 @@ export const usePreferencesStore = create<PreferencesState>()(
         timeSignature: '4/4',
         tempo: 120,
         playbackPattern: 'alternating',
+        chordSelectionPlaybackCount: 1,
         activeSynthType: 'melody',
         synthSettings: {
           pads: { volume: 60 },
@@ -133,6 +136,13 @@ export const usePreferencesStore = create<PreferencesState>()(
             }),
             false,
             'preferences/setVelocity'
+          ),
+
+        setChordSelectionPlaybackCount: (count) =>
+          set(
+            { chordSelectionPlaybackCount: count },
+            false,
+            'preferences/setChordSelectionPlaybackCount'
           ),
       }),
       {

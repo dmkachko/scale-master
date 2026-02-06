@@ -23,8 +23,8 @@ function Layout({ children }: LayoutProps) {
     setTimeSignature,
     tempo,
     setTempo,
-    activeSynthType,
-    setActiveSynthType,
+    chordSelectionPlaybackCount,
+    setChordSelectionPlaybackCount,
     synthSettings,
     setSynthVolume,
     velocitySettings,
@@ -144,37 +144,25 @@ function Layout({ children }: LayoutProps) {
                   </div>
 
                   <div className="settings-section">
-                    <h3>Synth Type</h3>
-                    <div className="radio-group">
-                      <label className="radio-label">
+                    <h3>Chord Selection Playback</h3>
+                    <div className="slider-group">
+                      <label className="slider-label">
+                        <span>
+                          {chordSelectionPlaybackCount === 0
+                            ? 'Current chord only'
+                            : chordSelectionPlaybackCount === 1
+                            ? 'Previous + current'
+                            : `Previous ${chordSelectionPlaybackCount} + current`}
+                        </span>
                         <input
-                          type="radio"
-                          name="synthType"
-                          value="pads"
-                          checked={activeSynthType === 'pads'}
-                          onChange={() => setActiveSynthType('pads')}
+                          type="range"
+                          min="0"
+                          max="5"
+                          step="1"
+                          value={chordSelectionPlaybackCount}
+                          onChange={(e) => setChordSelectionPlaybackCount(Number(e.target.value))}
+                          className="tempo-slider"
                         />
-                        <span>Pads (Soft)</span>
-                      </label>
-                      <label className="radio-label">
-                        <input
-                          type="radio"
-                          name="synthType"
-                          value="melody"
-                          checked={activeSynthType === 'melody'}
-                          onChange={() => setActiveSynthType('melody')}
-                        />
-                        <span>Melody (Clear)</span>
-                      </label>
-                      <label className="radio-label">
-                        <input
-                          type="radio"
-                          name="synthType"
-                          value="bass"
-                          checked={activeSynthType === 'bass'}
-                          onChange={() => setActiveSynthType('bass')}
-                        />
-                        <span>Bass (Deep)</span>
                       </label>
                     </div>
                   </div>

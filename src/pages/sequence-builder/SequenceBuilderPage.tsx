@@ -22,7 +22,7 @@ export default function SequenceBuilderPage() {
     clearSequence,
   } = useSequenceBuilderStore();
 
-  const { tempo, accidentalPreference } = usePreferencesStore();
+  const { tempo, accidentalPreference, chordSelectionPlaybackCount } = usePreferencesStore();
   const { catalog } = useCatalogStore();
 
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
@@ -108,7 +108,47 @@ export default function SequenceBuilderPage() {
     }));
   };
 
-  const handleAddChord = (chord: Chord) => {
+  const playChordWithPrevious = async (chord: Chord) => {
+    // Play previous chords + current chord
+    const beatDuration = 60000 / tempo;
+    const halfNoteDuration = beatDuration * 2;
+
+    // Get previous chords to play
+    const previousChords = savedSequence.slice(-chordSelectionPlaybackCount);
+
+    // Play previous chords
+    for (const state of previousChords) {
+      if (state.chord) {
+        const notes = chordToNotes(state.chord);
+        if (notes.length > 0) {
+          const bassNote = getBassNote(state.chord);
+          const chordNotes = notes.map(note => `${note}4`);
+          await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
+          await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
+        }
+      }
+    }
+
+    // Play the newly selected chord
+    const notes = chordToNotes(chord);
+    if (notes.length > 0) {
+      const bassNote = getBassNote(chord);
+      const chordNotes = notes.map(note => `${note}4`);
+      await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
+    }
+  };
+
+  const handleSelectChord = async (chord: Chord) => {
+    // Play previous chords + current
+    await playChordWithPrevious(chord);
+    // Update selection
+    selectChord(chord);
+  };
+
+  const handleAddChord = async (chord: Chord) => {
+    // Play previous chords + current
+    await playChordWithPrevious(chord);
+    // Update selection
     selectChord(chord);
     // Only save if at least one scale is selected
     if (draft?.s1 || draft?.s2) {
@@ -338,7 +378,7 @@ export default function SequenceBuilderPage() {
           {activeTab === 'chord' && (
             <ChordTable
               selectedChord={draft?.chord}
-              onSelectChord={selectChord}
+              onSelectChord={handleSelectChord}
               onAddChord={handleAddChord}
               accidentalPreference={accidentalPreference}
               selectedScales={[draft?.s1, draft?.s2].filter((s): s is { scale: string; root: string } => s != null)}
