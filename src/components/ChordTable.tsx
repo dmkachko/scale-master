@@ -99,7 +99,9 @@ export default function ChordTable({
         <div key={root} className={styles.rootGroup}>
           <div className={styles.chordPills}>
             {chords.map((chord) => {
-              const isSelected = selectedChord?.displayName === chord.displayName;
+              // Compare base chord (without bass) to handle slash chords
+              const selectedBaseChord = selectedChord?.displayName.split('/')[0];
+              const isSelected = selectedBaseChord === chord.displayName;
 
               return (
                 <div key={chord.displayName} className={styles.chordPillContainer}>
@@ -119,7 +121,7 @@ export default function ChordTable({
                       }}
                       className={styles.saveLink}
                       disabled={!canSaveDraft}
-                      title={canSaveDraft ? 'Save to sequence' : 'Select at least one scale to save'}
+                      title={canSaveDraft ? 'Save to sequence' : 'Select a chord to save'}
                     >
                       <Save size={14} />
                     </button>

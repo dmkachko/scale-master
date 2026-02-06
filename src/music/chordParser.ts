@@ -10,6 +10,8 @@ export interface Chord {
   quality: string;
   pitchClasses: Set<number>;
   displayName: string;
+  bass?: string; // Optional bass note for slash chords (e.g., "E" in "C/E")
+  bassPitchClass?: number;
 }
 
 export interface ParseChordsResult {
@@ -37,7 +39,7 @@ const CHORD_QUALITIES: Record<string, { intervals: number[]; displaySuffix: stri
   'dim7': { intervals: [0, 3, 6, 9], displaySuffix: 'dim7' }, // Diminished 7th
   '7': { intervals: [0, 4, 7, 10], displaySuffix: '7' }, // Dominant 7th
   'mmaj7': { intervals: [0, 3, 7, 11], displaySuffix: 'mmaj7' }, // Minor major 7th
-  'm7b5': { intervals: [0, 3, 6, 10], displaySuffix: 'm7♭5' }, // Half-diminished
+  'm7b5': { intervals: [0, 3, 6, 10], displaySuffix: 'ø7' }, // Half-diminished
   'aug7': { intervals: [0, 4, 8, 10], displaySuffix: 'aug7' }, // Augmented 7th
   '7sus4': { intervals: [0, 5, 7, 10], displaySuffix: '7sus4' }, // Dominant 7 sus4
 
@@ -48,17 +50,44 @@ const CHORD_QUALITIES: Record<string, { intervals: number[]; displaySuffix: stri
 
 /**
  * Parse a single chord symbol
- * @param chordSymbol - e.g., "C", "Am", "F#maj7", "Bbdim7"
+ * @param chordSymbol - e.g., "C", "Am", "F#maj7", "Bbdim7", "C/E" (slash chord)
  * @returns Chord object or null if invalid
  */
 export function parseChord(chordSymbol: string): Chord | null {
   const trimmed = chordSymbol.trim();
   if (!trimmed) return null;
 
+  // Check for slash chord notation (e.g., "C/E", "Dm7/G")
+  let bassNote: string | undefined;
+  let bassPitchClass: number | undefined;
+  let chordPart = trimmed;
+
+  const slashMatch = trimmed.match(/^(.+)\/([A-G][#b♯♭]?)$/i);
+  if (slashMatch) {
+    chordPart = slashMatch[1].trim();
+    const bassLetter = slashMatch[2][0].toUpperCase();
+    const bassAccidental = slashMatch[2].slice(1);
+
+    // Normalize bass accidental
+    let normalizedBassAccidental = '';
+    if (bassAccidental === '#' || bassAccidental === '♯') {
+      normalizedBassAccidental = '#';
+    } else if (bassAccidental === 'b' || bassAccidental === '♭') {
+      normalizedBassAccidental = 'b';
+    }
+
+    bassNote = bassLetter + normalizedBassAccidental;
+    bassPitchClass = getPitchClassFromNote(bassNote);
+
+    if (bassPitchClass === -1 || bassPitchClass === undefined) {
+      return null;
+    }
+  }
+
   // Match chord pattern: root note + optional quality
   // Root: A-G + optional accidental (#, b, ♯, ♭)
   // Quality: everything else (m, maj7, dim7, etc.)
-  const match = trimmed.match(/^([A-G])([#b♯♭]?)(.*)$/i);
+  const match = chordPart.match(/^([A-G])([#b♯♭]?)(.*)$/i);
 
   if (!match) return null;
 
@@ -114,12 +143,21 @@ export function parseChord(chordSymbol: string): Chord | null {
     pitchClasses.add((rootPitchClass + interval) % 12);
   }
 
+  // Add bass note to pitch classes if it's not already in the chord
+  if (bassNote && bassPitchClass !== undefined) {
+    pitchClasses.add(bassPitchClass);
+  }
+
+  const displayName = root + chordQuality.displaySuffix + (bassNote ? `/${bassNote}` : '');
+
   return {
     root,
     rootPitchClass,
     quality: quality || 'major',
     pitchClasses,
-    displayName: root + chordQuality.displaySuffix,
+    displayName,
+    bass: bassNote,
+    bassPitchClass,
   };
 }
 

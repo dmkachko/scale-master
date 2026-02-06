@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { Chord } from '../../music/chordParser';
+import { parseChord } from '../../music/chordParser';
 import { chordToNotes } from '../../music/chordProgression';
 import { audioEngine } from '../../services/audioEngine';
 import { useSequenceBuilderStore } from '../../store/sequenceBuilderStore';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { useCatalogStore } from '../../store/catalogStore';
 import { useCatalogInit } from '../../hooks/useCatalogInit';
+import { getPitchClassFromNote } from '../../music/notes';
 import ScaleTable from '../../components/ScaleTable';
 import ChordTable from '../../components/ChordTable';
 import styles from './SequenceBuilderPage.module.css';
@@ -28,15 +30,16 @@ export default function SequenceBuilderPage() {
 
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+  const [selectedBassNote, setSelectedBassNote] = useState<string | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const playbackCancelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
 
-  // Get bass note for a chord (currently root, can be changed for inversions)
+  // Get bass note for a chord (uses slash chord bass if specified, otherwise root)
   const getBassNote = (chord: Chord): string => {
-    // Currently using root note as bass
-    // Future: could use chord.bass if inversions are implemented
-    return `${chord.root}2`; // Two octaves below (chord is at octave 4)
+    // Use slash chord bass note if specified, otherwise use root
+    const bassNote = chord.bass || chord.root;
+    return `${bassNote}2`; // Two octaves below (chord is at octave 4)
   };
 
   const handlePlayChord = async (chord: Chord | null) => {
@@ -115,8 +118,10 @@ export default function SequenceBuilderPage() {
     const beatDuration = 60000 / tempo;
     const halfNoteDuration = beatDuration * 2;
 
-    // Get previous chords to play
-    const previousChords = savedSequence.slice(-chordSelectionPlaybackCount);
+    // Get previous chords to play (slice(-0) returns all, so handle 0 specially)
+    const previousChords = chordSelectionPlaybackCount > 0
+      ? savedSequence.slice(-chordSelectionPlaybackCount)
+      : [];
 
     // Play previous chords
     for (const state of previousChords) {
@@ -145,6 +150,17 @@ export default function SequenceBuilderPage() {
   };
 
   const handleSelectChord = (chord: Chord) => {
+    // Apply bass note if selected
+    let finalChord = chord;
+    if (selectedBassNote && selectedBassNote !== chord.root) {
+      // Create slash chord
+      const slashChordSymbol = `${chord.displayName}/${selectedBassNote}`;
+      const slashChord = parseChord(slashChordSymbol);
+      if (slashChord) {
+        finalChord = slashChord;
+      }
+    }
+
     // Cancel any ongoing playback
     playbackCancelRef.current.cancelled = true;
 
@@ -153,13 +169,24 @@ export default function SequenceBuilderPage() {
     playbackCancelRef.current = cancelToken;
 
     // Update selection immediately (don't wait for playback)
-    selectChord(chord);
+    selectChord(finalChord);
 
     // Start playback async (non-blocking)
-    playChordWithPrevious(chord, cancelToken);
+    playChordWithPrevious(finalChord, cancelToken);
   };
 
   const handleAddChord = (chord: Chord) => {
+    // Apply bass note if selected
+    let finalChord = chord;
+    if (selectedBassNote && selectedBassNote !== chord.root) {
+      // Create slash chord
+      const slashChordSymbol = `${chord.displayName}/${selectedBassNote}`;
+      const slashChord = parseChord(slashChordSymbol);
+      if (slashChord) {
+        finalChord = slashChord;
+      }
+    }
+
     // Cancel any ongoing playback
     playbackCancelRef.current.cancelled = true;
 
@@ -168,21 +195,70 @@ export default function SequenceBuilderPage() {
     playbackCancelRef.current = cancelToken;
 
     // Update selection immediately
-    selectChord(chord);
+    selectChord(finalChord);
 
     // Start playback async (non-blocking)
-    playChordWithPrevious(chord, cancelToken);
+    playChordWithPrevious(finalChord, cancelToken);
 
-    // Only save if at least one scale is selected
-    if (draft?.s1 || draft?.s2) {
-      saveDraft();
-    }
+    // Save the chord
+    saveDraft();
   };
 
-  // Check if draft can be saved (has chord and at least one scale)
-  const canSaveDraft = draft?.chord && (draft?.s1 || draft?.s2);
+  // Check if draft can be saved (has chord)
+  const canSaveDraft = !!draft?.chord;
+
+  // Calculate available bass notes from selected scales
+  const availableBassNotes = useMemo(() => {
+    const noteNames = accidentalPreference === 'sharps'
+      ? ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+      : ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+    // If no scales selected, show all notes
+    if (!draft?.s1 && !draft?.s2) {
+      return noteNames;
+    }
+
+    if (!catalog) return [];
+
+    const getScaleNotes = (root: string, scaleName: string): Set<number> => {
+      const scaleType = catalog.scaleTypes.find(st => st.name === scaleName);
+      if (!scaleType) return new Set();
+
+      const rootPitchClass = getPitchClassFromNote(root);
+      if (rootPitchClass === -1) return new Set();
+
+      const pitchClasses = new Set<number>();
+      for (const interval of scaleType.intervals) {
+        pitchClasses.add((rootPitchClass + interval) % 12);
+      }
+      return pitchClasses;
+    };
+
+    // Get pitch classes from both scales
+    const s1Notes = draft.s1 ? getScaleNotes(draft.s1.root, draft.s1.scale) : null;
+    const s2Notes = draft.s2 ? getScaleNotes(draft.s2.root, draft.s2.scale) : null;
+
+    // If both scales selected, get intersection; otherwise use the selected scale
+    let availablePitchClasses: Set<number>;
+    if (s1Notes && s2Notes) {
+      // Intersection of both scales
+      availablePitchClasses = new Set([...s1Notes].filter(pc => s2Notes.has(pc)));
+    } else if (s1Notes) {
+      availablePitchClasses = s1Notes;
+    } else if (s2Notes) {
+      availablePitchClasses = s2Notes;
+    } else {
+      return noteNames; // Fallback to all notes
+    }
+
+    // Convert pitch classes to note names
+    return Array.from(availablePitchClasses)
+      .sort((a, b) => a - b)
+      .map(pc => noteNames[pc]);
+  }, [draft?.s1, draft?.s2, catalog, accidentalPreference]);
 
   const handleClearDraftChord = () => {
+    setSelectedBassNote(null);
     useSequenceBuilderStore.setState((state) => ({
       draft: state.draft
         ? { ...state.draft, chord: null }
@@ -204,6 +280,42 @@ export default function SequenceBuilderPage() {
         ? { ...state.draft, s2: undefined }
         : null,
     }));
+  };
+
+  const handleBassNoteChange = (bassNote: string | null) => {
+    setSelectedBassNote(bassNote);
+
+    // If there's a chord in draft, update it with the new bass note
+    if (draft?.chord) {
+      const baseChord = draft.chord;
+      // Remove any existing bass to get the base chord symbol
+      const baseChordSymbol = baseChord.displayName.split('/')[0];
+
+      let newChord: Chord;
+      if (bassNote && bassNote !== baseChord.root) {
+        // Create slash chord
+        const slashChordSymbol = `${baseChordSymbol}/${bassNote}`;
+        const parsed = parseChord(slashChordSymbol);
+        newChord = parsed || baseChord;
+      } else {
+        // Use base chord without slash
+        const parsed = parseChord(baseChordSymbol);
+        newChord = parsed || baseChord;
+      }
+
+      // Cancel any ongoing playback
+      playbackCancelRef.current.cancelled = true;
+
+      // Create new cancel token for this playback
+      const cancelToken = { cancelled: false };
+      playbackCancelRef.current = cancelToken;
+
+      // Update selection
+      selectChord(newChord);
+
+      // Play the chord with new bass
+      playChordWithPrevious(newChord, cancelToken);
+    }
   };
 
   // Combine saved sequence and draft for display
@@ -239,7 +351,10 @@ export default function SequenceBuilderPage() {
               )}
               {savedSequence.length > 0 && (
                 <button
-                  onClick={moveToPrevious}
+                  onClick={() => {
+                    moveToPrevious();
+                    setSelectedBassNote(null);
+                  }}
                   className="btn btn-secondary btn-sm"
                   title="Delete last saved chord"
                 >
@@ -247,7 +362,10 @@ export default function SequenceBuilderPage() {
                 </button>
               )}
               <button
-                onClick={clearSequence}
+                onClick={() => {
+                  clearSequence();
+                  setSelectedBassNote(null);
+                }}
                 className="btn btn-secondary btn-sm"
               >
                 Clear
@@ -354,7 +472,7 @@ export default function SequenceBuilderPage() {
                               disabled={!canSaveDraft}
                               title={
                                 !canSaveDraft
-                                  ? 'Select at least one scale to save'
+                                  ? 'Select a chord to save'
                                   : 'Save this chord to the sequence'
                               }
                             >
@@ -382,62 +500,89 @@ export default function SequenceBuilderPage() {
           </div>
         </div>
 
-        {/* Selector with Tabs */}
-        <div className={styles.selectorSection}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.tabs}>
-              <button
-                className={`${styles.tab} ${activeTab === 'chord' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('chord')}
-              >
-                Select Chord
-              </button>
-              <button
-                className={`${styles.tab} ${activeTab === 'scale' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('scale')}
-              >
-                Select Scale
-              </button>
-              <button
-                className={`${styles.tab} ${activeTab === 'scale2' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('scale2')}
-              >
-                Select Scale 2
-              </button>
+        {/* Selector with Tabs and Bass Selector */}
+        <div className={styles.selectorRow}>
+          <div className={styles.selectorSection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.tabs}>
+                <button
+                  className={`${styles.tab} ${activeTab === 'chord' ? styles.activeTab : ''}`}
+                  onClick={() => setActiveTab('chord')}
+                >
+                  Select Chord
+                </button>
+                <button
+                  className={`${styles.tab} ${activeTab === 'scale' ? styles.activeTab : ''}`}
+                  onClick={() => setActiveTab('scale')}
+                >
+                  Select Scale
+                </button>
+                <button
+                  className={`${styles.tab} ${activeTab === 'scale2' ? styles.activeTab : ''}`}
+                  onClick={() => setActiveTab('scale2')}
+                >
+                  Select Scale 2
+                </button>
+              </div>
             </div>
+
+            {activeTab === 'chord' && (
+              <ChordTable
+                selectedChord={draft?.chord}
+                onSelectChord={handleSelectChord}
+                onAddChord={handleAddChord}
+                onSaveDraft={saveDraft}
+                canSaveDraft={canSaveDraft}
+                accidentalPreference={accidentalPreference}
+                selectedScales={[draft?.s1, draft?.s2].filter((s): s is { scale: string; root: string } => s != null)}
+                scaleTypes={catalog?.scaleTypes}
+              />
+            )}
+
+            {activeTab === 'scale' && catalog && (
+              <ScaleTable
+                catalog={catalog}
+                selectedScale={draft?.s1}
+                onSelectScale={handleSelectScale}
+                accidentalPreference={accidentalPreference}
+                selectedChord={draft?.chord}
+              />
+            )}
+
+            {activeTab === 'scale2' && catalog && (
+              <ScaleTable
+                catalog={catalog}
+                selectedScale={draft?.s2}
+                onSelectScale={handleSelectScale2}
+                accidentalPreference={accidentalPreference}
+                selectedChord={draft?.chord}
+              />
+            )}
           </div>
 
+          {/* Bass Note Selector */}
           {activeTab === 'chord' && (
-            <ChordTable
-              selectedChord={draft?.chord}
-              onSelectChord={handleSelectChord}
-              onAddChord={handleAddChord}
-              onSaveDraft={saveDraft}
-              canSaveDraft={canSaveDraft}
-              accidentalPreference={accidentalPreference}
-              selectedScales={[draft?.s1, draft?.s2].filter((s): s is { scale: string; root: string } => s != null)}
-              scaleTypes={catalog?.scaleTypes}
-            />
-          )}
-
-          {activeTab === 'scale' && catalog && (
-            <ScaleTable
-              catalog={catalog}
-              selectedScale={draft?.s1}
-              onSelectScale={handleSelectScale}
-              accidentalPreference={accidentalPreference}
-              selectedChord={draft?.chord}
-            />
-          )}
-
-          {activeTab === 'scale2' && catalog && (
-            <ScaleTable
-              catalog={catalog}
-              selectedScale={draft?.s2}
-              onSelectScale={handleSelectScale2}
-              accidentalPreference={accidentalPreference}
-              selectedChord={draft?.chord}
-            />
+            <div className={styles.bassSelector}>
+              <h3 className={styles.bassSelectorTitle}>Bass Note</h3>
+              <div className={styles.bassNotes}>
+                <button
+                  onClick={() => handleBassNoteChange(null)}
+                  className={`${styles.bassNote} ${selectedBassNote === null ? styles.selectedBassNote : ''}`}
+                  title="Use chord root as bass"
+                >
+                  Root
+                </button>
+                {availableBassNotes.map((note) => (
+                  <button
+                    key={note}
+                    onClick={() => handleBassNoteChange(note)}
+                    className={`${styles.bassNote} ${selectedBassNote === note ? styles.selectedBassNote : ''}`}
+                  >
+                    {note}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>
