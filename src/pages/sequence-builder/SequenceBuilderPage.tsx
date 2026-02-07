@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil, Check, X } from 'lucide-react';
 import type { Chord } from '../../music/chordParser';
 import { parseChord } from '../../music/chordParser';
 import { chordToNotes } from '../../music/chordProgression';
@@ -31,6 +31,7 @@ export default function SequenceBuilderPage() {
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [selectedBassNote, setSelectedBassNote] = useState<string | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const playbackCancelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
@@ -168,14 +169,30 @@ export default function SequenceBuilderPage() {
     const cancelToken = { cancelled: false };
     playbackCancelRef.current = cancelToken;
 
-    // Update selection immediately (don't wait for playback)
-    selectChord(finalChord);
+    // Update the appropriate target (editing card or draft)
+    if (editingIndex !== null) {
+      // Update the saved sequence item
+      useSequenceBuilderStore.setState((state) => ({
+        savedSequence: state.savedSequence.map((item, i) =>
+          i === editingIndex ? { ...item, chord: finalChord } : item
+        ),
+      }));
+    } else {
+      // Update draft
+      selectChord(finalChord);
+    }
 
     // Start playback async (non-blocking)
     playChordWithPrevious(finalChord, cancelToken);
   };
 
   const handleAddChord = (chord: Chord) => {
+    // Don't allow adding chords while editing
+    if (editingIndex !== null) {
+      handleSelectChord(chord);
+      return;
+    }
+
     // Apply bass note if selected
     let finalChord = chord;
     if (selectedBassNote && selectedBassNote !== chord.root) {
@@ -285,9 +302,11 @@ export default function SequenceBuilderPage() {
   const handleBassNoteChange = (bassNote: string | null) => {
     setSelectedBassNote(bassNote);
 
-    // If there's a chord in draft, update it with the new bass note
-    if (draft?.chord) {
-      const baseChord = draft.chord;
+    // Determine which chord to update (draft or editing)
+    const targetChord = editingIndex !== null ? savedSequence[editingIndex]?.chord : draft?.chord;
+
+    if (targetChord) {
+      const baseChord = targetChord;
       // Remove any existing bass to get the base chord symbol
       const baseChordSymbol = baseChord.displayName.split('/')[0];
 
@@ -310,12 +329,62 @@ export default function SequenceBuilderPage() {
       const cancelToken = { cancelled: false };
       playbackCancelRef.current = cancelToken;
 
-      // Update selection
-      selectChord(newChord);
+      // Update the appropriate target
+      if (editingIndex !== null) {
+        // Update the saved sequence item
+        useSequenceBuilderStore.setState((state) => ({
+          savedSequence: state.savedSequence.map((item, i) =>
+            i === editingIndex ? { ...item, chord: newChord } : item
+          ),
+        }));
+      } else {
+        // Update draft
+        selectChord(newChord);
+      }
 
       // Play the chord with new bass
       playChordWithPrevious(newChord, cancelToken);
     }
+  };
+
+  const handleEditCard = (index: number) => {
+    const card = savedSequence[index];
+    if (!card) return;
+
+    // Enter edit mode
+    setEditingIndex(index);
+
+    // Load the card's bass note if it has one
+    if (card.chord?.bass) {
+      setSelectedBassNote(card.chord.bass);
+    } else {
+      setSelectedBassNote(null);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    // Just exit edit mode - changes are already applied
+    setEditingIndex(null);
+    setSelectedBassNote(null);
+  };
+
+  const handleCancelEdit = () => {
+    // Exit edit mode without changes
+    setEditingIndex(null);
+    setSelectedBassNote(null);
+  };
+
+  const handleDeleteCard = () => {
+    if (editingIndex === null) return;
+
+    // Remove the card from sequence
+    useSequenceBuilderStore.setState((state) => ({
+      savedSequence: state.savedSequence.filter((_, i) => i !== editingIndex),
+    }));
+
+    // Exit edit mode
+    setEditingIndex(null);
+    setSelectedBassNote(null);
   };
 
   // Combine saved sequence and draft for display
@@ -380,6 +449,8 @@ export default function SequenceBuilderPage() {
                   const isDraft = index === allCells.length - 1; // Last cell is always draft
                   const isSaved = state.saved;
                   const isPlaying = playingIndex === index;
+                  const isEditing = editingIndex === index;
+                  const isDisabled = isDraft && editingIndex !== null;
 
                   return (
                     <div
@@ -388,9 +459,25 @@ export default function SequenceBuilderPage() {
                         isDraft ? styles.currentCard : ''
                       } ${isSaved ? styles.savedCard : ''} ${
                         isPlaying ? styles.playingCard : ''
+                      } ${isEditing ? styles.editingCard : ''} ${
+                        isDisabled ? styles.disabledCard : ''
                       }`}
                     >
-                      <div className={styles.stateNumber}>{index + 1}</div>
+                      <div className={styles.stateNumber}>
+                        {index + 1}
+                        {isSaved && !isEditing && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditCard(index);
+                            }}
+                            className={styles.editButton}
+                            title="Edit this card"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        )}
+                      </div>
                       <div className={styles.stateContent}>
                         <div className={styles.chordRow}>
                           <div
@@ -460,7 +547,7 @@ export default function SequenceBuilderPage() {
                           </div>
                         </div>
                       </div>
-                      {isDraft && (
+                      {isDraft && !isDisabled && (
                         <div className={styles.cellControls}>
                           {state.chord && (
                             <button
@@ -490,6 +577,40 @@ export default function SequenceBuilderPage() {
                               &lt;
                             </button>
                           )}
+                        </div>
+                      )}
+                      {isEditing && (
+                        <div className={styles.cellControls}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSaveEdit();
+                            }}
+                            className="btn btn-primary btn-sm"
+                            title="Save changes"
+                          >
+                            <Check size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCancelEdit();
+                            }}
+                            className="btn btn-secondary btn-sm"
+                            title="Cancel editing"
+                          >
+                            <X size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCard();
+                            }}
+                            className="btn btn-secondary btn-sm"
+                            title="Delete this card"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       )}
                     </div>
@@ -528,13 +649,17 @@ export default function SequenceBuilderPage() {
 
             {activeTab === 'chord' && (
               <ChordTable
-                selectedChord={draft?.chord}
+                selectedChord={editingIndex !== null ? savedSequence[editingIndex]?.chord : draft?.chord}
                 onSelectChord={handleSelectChord}
                 onAddChord={handleAddChord}
-                onSaveDraft={saveDraft}
-                canSaveDraft={canSaveDraft}
+                onSaveDraft={editingIndex !== null ? handleSaveEdit : saveDraft}
+                canSaveDraft={editingIndex !== null ? true : canSaveDraft}
                 accidentalPreference={accidentalPreference}
-                selectedScales={[draft?.s1, draft?.s2].filter((s): s is { scale: string; root: string } => s != null)}
+                selectedScales={
+                  editingIndex !== null
+                    ? [savedSequence[editingIndex]?.s1, savedSequence[editingIndex]?.s2].filter((s): s is { scale: string; root: string } => s != null)
+                    : [draft?.s1, draft?.s2].filter((s): s is { scale: string; root: string } => s != null)
+                }
                 scaleTypes={catalog?.scaleTypes}
               />
             )}
