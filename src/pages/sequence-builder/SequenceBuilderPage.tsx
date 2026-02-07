@@ -43,13 +43,14 @@ export default function SequenceBuilderPage() {
     return `${bassNote}2`; // Two octaves below (chord is at octave 4)
   };
 
-  const handlePlayChord = async (chord: Chord | null) => {
+  const handlePlayChord = async (chord: Chord | null, beats: number = 4) => {
     if (!chord) return;
     const notes = chordToNotes(chord);
     if (notes.length > 0) {
       const bassNote = getBassNote(chord);
       const chordNotes = notes.map(note => `${note}4`);
-      await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
+      const durationSeconds = (60 / tempo) * beats;
+      await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
     }
   };
 
@@ -70,10 +71,11 @@ export default function SequenceBuilderPage() {
             const bassNote = getBassNote(state.chord);
             const chordNotes = notes.map(note => `${note}4`);
             const beats = state.beats || 4;
-            const chordDuration = beatDuration * beats;
+            // Calculate duration in seconds: (60 / BPM) * beats
+            const durationSeconds = (60 / tempo) * beats;
 
-            await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
-            await new Promise(resolve => setTimeout(resolve, chordDuration));
+            await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
+            await new Promise(resolve => setTimeout(resolve, beatDuration * beats));
           }
         }
       }
@@ -86,10 +88,11 @@ export default function SequenceBuilderPage() {
           const bassNote = getBassNote(draft.chord);
           const chordNotes = notes.map(note => `${note}4`);
           const beats = draft.beats || 4;
-          const chordDuration = beatDuration * beats;
+          // Calculate duration in seconds: (60 / BPM) * beats
+          const durationSeconds = (60 / tempo) * beats;
 
-          await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
-          await new Promise(resolve => setTimeout(resolve, chordDuration));
+          await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
+          await new Promise(resolve => setTimeout(resolve, beatDuration * beats));
         }
       }
 
@@ -136,10 +139,9 @@ export default function SequenceBuilderPage() {
     }
   };
 
-  const playChordWithPrevious = async (chord: Chord, cancelToken: { cancelled: boolean }) => {
+  const playChordWithPrevious = async (chord: Chord, cancelToken: { cancelled: boolean }, currentBeats: number = 4) => {
     // Play previous chords + current chord
     const beatDuration = 60000 / tempo;
-    const halfNoteDuration = beatDuration * 2;
 
     // Get previous chords to play (slice(-0) returns all, so handle 0 specially)
     const previousChords = chordSelectionPlaybackCount > 0
@@ -155,8 +157,10 @@ export default function SequenceBuilderPage() {
         if (notes.length > 0) {
           const bassNote = getBassNote(state.chord);
           const chordNotes = notes.map(note => `${note}4`);
-          await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
-          await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
+          const beats = state.beats || 4;
+          const durationSeconds = (60 / tempo) * beats;
+          await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
+          await new Promise(resolve => setTimeout(resolve, beatDuration * beats));
         }
       }
     }
@@ -168,7 +172,8 @@ export default function SequenceBuilderPage() {
     if (notes.length > 0) {
       const bassNote = getBassNote(chord);
       const chordNotes = notes.map(note => `${note}4`);
-      await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
+      const durationSeconds = (60 / tempo) * currentBeats;
+      await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
     }
   };
 
@@ -204,8 +209,13 @@ export default function SequenceBuilderPage() {
       selectChord(finalChord);
     }
 
+    // Get beats for playback
+    const currentBeats = editingIndex !== null
+      ? (savedSequence[editingIndex]?.beats || 4)
+      : (draft?.beats || 4);
+
     // Start playback async (non-blocking)
-    playChordWithPrevious(finalChord, cancelToken);
+    playChordWithPrevious(finalChord, cancelToken, currentBeats);
   };
 
   const handleAddChord = (chord: Chord) => {
@@ -236,8 +246,11 @@ export default function SequenceBuilderPage() {
     // Update selection immediately
     selectChord(finalChord);
 
+    // Get beats for playback
+    const currentBeats = draft?.beats || 4;
+
     // Start playback async (non-blocking)
-    playChordWithPrevious(finalChord, cancelToken);
+    playChordWithPrevious(finalChord, cancelToken, currentBeats);
 
     // Save the chord
     saveDraft();
@@ -364,8 +377,13 @@ export default function SequenceBuilderPage() {
         selectChord(newChord);
       }
 
+      // Get beats for playback
+      const currentBeats = editingIndex !== null
+        ? (savedSequence[editingIndex]?.beats || 4)
+        : (draft?.beats || 4);
+
       // Play the chord with new bass
-      playChordWithPrevious(newChord, cancelToken);
+      playChordWithPrevious(newChord, cancelToken, currentBeats);
     }
   };
 
@@ -544,7 +562,7 @@ export default function SequenceBuilderPage() {
                             className={`${styles.chordDisplay} ${!state.chord ? styles.emptyChord : ''}`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              handlePlayChord(state.chord);
+                              handlePlayChord(state.chord, state.beats || 4);
                             }}
                           >
                             {state.chord ? state.chord.displayName : '—'}
