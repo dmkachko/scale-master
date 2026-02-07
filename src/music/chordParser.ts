@@ -24,22 +24,22 @@ export interface ParseChordsResult {
  * Chord quality definitions
  * Each quality maps to intervals from root (in semitones)
  */
-const CHORD_QUALITIES: Record<string, { intervals: number[]; displaySuffix: string }> = {
+const CHORD_QUALITIES: Record<string, { intervals: number[]; displaySuffix: string; aliases?: string[] }> = {
   // Triads
-  '': { intervals: [0, 4, 7], displaySuffix: '' }, // Major
-  'm': { intervals: [0, 3, 7], displaySuffix: 'm' }, // Minor
-  'dim': { intervals: [0, 3, 6], displaySuffix: 'dim' }, // Diminished
-  'aug': { intervals: [0, 4, 8], displaySuffix: 'aug' }, // Augmented
+  '': { intervals: [0, 4, 7], displaySuffix: '', aliases: ['maj', 'major'] }, // Major
+  'm': { intervals: [0, 3, 7], displaySuffix: 'm', aliases: ['min', 'minor', '-', 'mi'] }, // Minor
+  'dim': { intervals: [0, 3, 6], displaySuffix: 'dim', aliases: ['diminished', '°', 'o'] }, // Diminished
+  'aug': { intervals: [0, 4, 8], displaySuffix: 'aug', aliases: ['augmented', '+'] }, // Augmented
   'sus2': { intervals: [0, 2, 7], displaySuffix: 'sus2' }, // Suspended 2nd
   'sus4': { intervals: [0, 5, 7], displaySuffix: 'sus4' }, // Suspended 4th
 
   // 7th chords
-  'maj7': { intervals: [0, 4, 7, 11], displaySuffix: 'maj7' }, // Major 7th
+  'maj7': { intervals: [0, 4, 7, 11], displaySuffix: 'maj7', aliases: ['Δ'] }, // Major 7th
   'm7': { intervals: [0, 3, 7, 10], displaySuffix: 'm7' }, // Minor 7th
   'dim7': { intervals: [0, 3, 6, 9], displaySuffix: 'dim7' }, // Diminished 7th
-  '7': { intervals: [0, 4, 7, 10], displaySuffix: '7' }, // Dominant 7th
+  '7': { intervals: [0, 4, 7, 10], displaySuffix: '7', aliases: ['dominant', 'dom'] }, // Dominant 7th
   'mmaj7': { intervals: [0, 3, 7, 11], displaySuffix: 'mmaj7' }, // Minor major 7th
-  'm7b5': { intervals: [0, 3, 6, 10], displaySuffix: 'ø7' }, // Half-diminished
+  'm7b5': { intervals: [0, 3, 6, 10], displaySuffix: 'ø7', aliases: ['ø'] }, // Half-diminished
   'aug7': { intervals: [0, 4, 8, 10], displaySuffix: 'aug7' }, // Augmented 7th
   '7sus4': { intervals: [0, 5, 7, 10], displaySuffix: '7sus4' }, // Dominant 7 sus4
 
@@ -111,23 +111,23 @@ export function parseChord(chordSymbol: string): Chord | null {
   // Normalize quality string (lowercase for matching, handle aliases)
   let quality = qualityStr.toLowerCase().trim();
 
-  // Handle common aliases
-  const qualityAliases: Record<string, string> = {
-    'min': 'm',
-    'minor': 'm',
-    'maj': '', // major without 7 is just major triad
-    'major': '',
-    'diminished': 'dim',
-    'augmented': 'aug',
-    'dominant': '7',
-    'dom': '7',
-    '-': 'm',
-    'mi': 'm',
-    'Δ': 'maj7',
-    'ø': 'm7b5',
-    '°': 'dim',
-    '+': 'aug',
-  };
+  // Build alias lookup from CHORD_QUALITIES
+  const qualityAliases: Record<string, string> = {};
+
+  for (const [qualityKey, qualityDef] of Object.entries(CHORD_QUALITIES)) {
+    // Add displaySuffix as alias (so users can type what they see)
+    const displaySuffix = qualityDef.displaySuffix.toLowerCase();
+    if (displaySuffix && displaySuffix !== qualityKey) {
+      qualityAliases[displaySuffix] = qualityKey;
+    }
+
+    // Add explicit aliases
+    if (qualityDef.aliases) {
+      for (const alias of qualityDef.aliases) {
+        qualityAliases[alias.toLowerCase()] = qualityKey;
+      }
+    }
+  }
 
   quality = qualityAliases[quality] ?? quality;
 

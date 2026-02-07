@@ -99,9 +99,9 @@ export default function ChordTable({
         <div key={root} className={styles.rootGroup}>
           <div className={styles.chordPills}>
             {chords.map((chord) => {
-              // Compare base chord (without bass) to handle slash chords
-              const selectedBaseChord = selectedChord?.displayName.split('/')[0];
-              const isSelected = selectedBaseChord === chord.displayName;
+              // Compare based on root and quality, not display name
+              const isSelected = selectedChord?.root === chord.root &&
+                                 selectedChord?.quality === chord.quality;
 
               return (
                 <div key={chord.displayName} className={styles.chordPillContainer}>
