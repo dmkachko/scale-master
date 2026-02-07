@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Trash2, Pencil, Check, X } from 'lucide-react';
+import { Trash2, Pencil, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Chord } from '../../music/chordParser';
 import { parseChord } from '../../music/chordParser';
 import { chordToNotes } from '../../music/chordProgression';
@@ -55,11 +55,9 @@ export default function SequenceBuilderPage() {
 
   const handlePlaySequence = async () => {
     try {
-      // Calculate delay based on tempo
-      // For half note (2n) = 2 beats
+      // Calculate beat duration based on tempo
       // Beat duration = 60000ms / BPM
       const beatDuration = 60000 / tempo;
-      const halfNoteDuration = beatDuration * 2;
 
       // Play all saved chords
       for (let i = 0; i < savedSequence.length; i++) {
@@ -71,8 +69,11 @@ export default function SequenceBuilderPage() {
           if (notes.length > 0) {
             const bassNote = getBassNote(state.chord);
             const chordNotes = notes.map(note => `${note}4`);
+            const beats = state.beats || 4;
+            const chordDuration = beatDuration * beats;
+
             await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
-            await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
+            await new Promise(resolve => setTimeout(resolve, chordDuration));
           }
         }
       }
@@ -84,8 +85,11 @@ export default function SequenceBuilderPage() {
         if (notes.length > 0) {
           const bassNote = getBassNote(draft.chord);
           const chordNotes = notes.map(note => `${note}4`);
+          const beats = draft.beats || 4;
+          const chordDuration = beatDuration * beats;
+
           await audioEngine.playChord([bassNote, ...chordNotes], undefined, '2n');
-          await new Promise(resolve => setTimeout(resolve, halfNoteDuration));
+          await new Promise(resolve => setTimeout(resolve, chordDuration));
         }
       }
 
@@ -97,21 +101,39 @@ export default function SequenceBuilderPage() {
   };
 
   const handleSelectScale = (scaleName: string, root: string) => {
-    // Update draft's s1 field with the selected scale
-    useSequenceBuilderStore.setState((state) => ({
-      draft: state.draft
-        ? { ...state.draft, s1: { scale: scaleName, root } }
-        : null,
-    }));
+    if (editingIndex !== null) {
+      // Update editing card's s1
+      useSequenceBuilderStore.setState((state) => ({
+        savedSequence: state.savedSequence.map((item, i) =>
+          i === editingIndex ? { ...item, s1: { scale: scaleName, root } } : item
+        ),
+      }));
+    } else {
+      // Update draft's s1 field with the selected scale
+      useSequenceBuilderStore.setState((state) => ({
+        draft: state.draft
+          ? { ...state.draft, s1: { scale: scaleName, root } }
+          : null,
+      }));
+    }
   };
 
   const handleSelectScale2 = (scaleName: string, root: string) => {
-    // Update draft's s2 field with the selected scale
-    useSequenceBuilderStore.setState((state) => ({
-      draft: state.draft
-        ? { ...state.draft, s2: { scale: scaleName, root } }
-        : null,
-    }));
+    if (editingIndex !== null) {
+      // Update editing card's s2
+      useSequenceBuilderStore.setState((state) => ({
+        savedSequence: state.savedSequence.map((item, i) =>
+          i === editingIndex ? { ...item, s2: { scale: scaleName, root } } : item
+        ),
+      }));
+    } else {
+      // Update draft's s2 field with the selected scale
+      useSequenceBuilderStore.setState((state) => ({
+        draft: state.draft
+          ? { ...state.draft, s2: { scale: scaleName, root } }
+          : null,
+      }));
+    }
   };
 
   const playChordWithPrevious = async (chord: Chord, cancelToken: { cancelled: boolean }) => {
@@ -387,6 +409,44 @@ export default function SequenceBuilderPage() {
     setSelectedBassNote(null);
   };
 
+  const handleIncreaseBeats = (index: number) => {
+    const isDraft = index === savedSequence.length;
+    const maxBeats = 6;
+
+    if (isDraft) {
+      useSequenceBuilderStore.setState((state) => ({
+        draft: state.draft
+          ? { ...state.draft, beats: Math.min((state.draft.beats || 4) + 1, maxBeats) }
+          : null,
+      }));
+    } else {
+      useSequenceBuilderStore.setState((state) => ({
+        savedSequence: state.savedSequence.map((item, i) =>
+          i === index ? { ...item, beats: Math.min((item.beats || 4) + 1, maxBeats) } : item
+        ),
+      }));
+    }
+  };
+
+  const handleDecreaseBeats = (index: number) => {
+    const isDraft = index === savedSequence.length;
+    const minBeats = 1;
+
+    if (isDraft) {
+      useSequenceBuilderStore.setState((state) => ({
+        draft: state.draft
+          ? { ...state.draft, beats: Math.max((state.draft.beats || 4) - 1, minBeats) }
+          : null,
+      }));
+    } else {
+      useSequenceBuilderStore.setState((state) => ({
+        savedSequence: state.savedSequence.map((item, i) =>
+          i === index ? { ...item, beats: Math.max((item.beats || 4) - 1, minBeats) } : item
+        ),
+      }));
+    }
+  };
+
   // Combine saved sequence and draft for display
   const allCells = [...savedSequence, draft!];
 
@@ -613,6 +673,42 @@ export default function SequenceBuilderPage() {
                           </button>
                         </div>
                       )}
+
+                      {/* Beat Indicators */}
+                      <div className={styles.beatIndicators}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDecreaseBeats(index);
+                          }}
+                          className={styles.beatChevron}
+                          disabled={isDisabled || (state.beats || 4) <= 1}
+                          title="Decrease beats"
+                        >
+                          <ChevronLeft size={14} />
+                        </button>
+                        <div className={styles.beats}>
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={`${styles.beat} ${
+                                i < (state.beats || 4) ? styles.activeBeat : styles.inactiveBeat
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleIncreaseBeats(index);
+                          }}
+                          className={styles.beatChevron}
+                          disabled={isDisabled || (state.beats || 4) >= 6}
+                          title="Increase beats"
+                        >
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -667,20 +763,20 @@ export default function SequenceBuilderPage() {
             {activeTab === 'scale' && catalog && (
               <ScaleTable
                 catalog={catalog}
-                selectedScale={draft?.s1}
+                selectedScale={editingIndex !== null ? savedSequence[editingIndex]?.s1 : draft?.s1}
                 onSelectScale={handleSelectScale}
                 accidentalPreference={accidentalPreference}
-                selectedChord={draft?.chord}
+                selectedChord={editingIndex !== null ? savedSequence[editingIndex]?.chord : draft?.chord}
               />
             )}
 
             {activeTab === 'scale2' && catalog && (
               <ScaleTable
                 catalog={catalog}
-                selectedScale={draft?.s2}
+                selectedScale={editingIndex !== null ? savedSequence[editingIndex]?.s2 : draft?.s2}
                 onSelectScale={handleSelectScale2}
                 accidentalPreference={accidentalPreference}
-                selectedChord={draft?.chord}
+                selectedChord={editingIndex !== null ? savedSequence[editingIndex]?.chord : draft?.chord}
               />
             )}
           </div>

@@ -10,6 +10,7 @@ export interface ChordState {
   s1?: {scale: string; root: string};
   s2?: {scale: string; root: string};
   saved?: boolean;
+  beats?: number; // Duration in beats (1-6, default 4)
 }
 
 export interface ChordSequence {
@@ -83,6 +84,7 @@ export function createChordState(chordSymbol: string | null, saved: boolean = fa
     s1,
     s2: undefined,
     saved,
+    beats: 4,
   };
 }
 
@@ -95,6 +97,7 @@ export function createEmptyChordState(): ChordState {
     s1: undefined,
     s2: undefined,
     saved: false,
+    beats: 4,
   };
 }
 
