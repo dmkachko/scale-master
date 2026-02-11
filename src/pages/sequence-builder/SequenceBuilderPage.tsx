@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trash2, Pencil, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Chord } from '../../music/chordParser';
 import { parseChord } from '../../music/chordParser';
@@ -6,8 +6,9 @@ import { useSequenceBuilderStore } from '../../store/sequenceBuilderStore';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { useCatalogStore } from '../../store/catalogStore';
 import { useCatalogInit } from '../../hooks/useCatalogInit';
-import { getPitchClassFromNote } from '../../music/notes';
 import { useSequencePlayback } from './useSequencePlayback';
+import { useSequenceEdit } from './useSequenceEdit';
+import { useAvailableBassNotes } from './useAvailableBassNotes';
 import ScaleTable from '../../components/ScaleTable';
 import ChordTable from '../../components/ChordTable';
 import styles from './SequenceBuilderPage.module.css';
@@ -47,9 +48,28 @@ export default function SequenceBuilderPage() {
     chordSelectionPlaybackCount,
   });
 
+  // Edit mode hook
+  const {
+    editingIndex,
+    selectedBassNote,
+    setSelectedBassNote,
+    handleEditCard,
+    handleSaveEdit,
+    handleCancelEdit,
+    handleDeleteCard,
+  } = useSequenceEdit({
+    savedSequence,
+    deleteSavedChord,
+  });
+
+  // Bass notes calculation hook
+  const availableBassNotes = useAvailableBassNotes({
+    draft,
+    catalog,
+    accidentalPreference,
+  });
+
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
-  const [selectedBassNote, setSelectedBassNote] = useState<string | null>(null);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -131,56 +151,6 @@ export default function SequenceBuilderPage() {
   // Check if draft can be saved (has chord)
   const canSaveDraft = !!draft?.chord;
 
-  // Calculate available bass notes from selected scales
-  const availableBassNotes = useMemo(() => {
-    const noteNames = accidentalPreference === 'sharps'
-      ? ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-      : ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-
-    // If no scales selected, show all notes
-    if (!draft?.s1 && !draft?.s2) {
-      return noteNames;
-    }
-
-    if (!catalog) return [];
-
-    const getScaleNotes = (root: string, scaleName: string): Set<number> => {
-      const scaleType = catalog.scaleTypes.find(st => st.name === scaleName);
-      if (!scaleType) return new Set();
-
-      const rootPitchClass = getPitchClassFromNote(root);
-      if (rootPitchClass === -1) return new Set();
-
-      const pitchClasses = new Set<number>();
-      for (const interval of scaleType.intervals) {
-        pitchClasses.add((rootPitchClass + interval) % 12);
-      }
-      return pitchClasses;
-    };
-
-    // Get pitch classes from both scales
-    const s1Notes = draft.s1 ? getScaleNotes(draft.s1.root, draft.s1.scale) : null;
-    const s2Notes = draft.s2 ? getScaleNotes(draft.s2.root, draft.s2.scale) : null;
-
-    // If both scales selected, get intersection; otherwise use the selected scale
-    let availablePitchClasses: Set<number>;
-    if (s1Notes && s2Notes) {
-      // Intersection of both scales
-      availablePitchClasses = new Set([...s1Notes].filter(pc => s2Notes.has(pc)));
-    } else if (s1Notes) {
-      availablePitchClasses = s1Notes;
-    } else if (s2Notes) {
-      availablePitchClasses = s2Notes;
-    } else {
-      return noteNames; // Fallback to all notes
-    }
-
-    // Convert pitch classes to note names
-    return Array.from(availablePitchClasses)
-      .sort((a, b) => a - b)
-      .map(pc => noteNames[pc]);
-  }, [draft?.s1, draft?.s2, catalog, accidentalPreference]);
-
   const handleClearDraftChord = () => {
     setSelectedBassNote(null);
     clearDraftChord();
@@ -232,43 +202,6 @@ export default function SequenceBuilderPage() {
       // Play the chord with new bass
       playChordWithPrevious(newChord, savedSequence, currentBeats);
     }
-  };
-
-  const handleEditCard = (index: number) => {
-    const card = savedSequence[index];
-    if (!card) return;
-
-    // Enter edit mode
-    setEditingIndex(index);
-
-    // Load the card's bass note if it has one
-    if (card.chord?.bass) {
-      setSelectedBassNote(card.chord.bass);
-    } else {
-      setSelectedBassNote(null);
-    }
-  };
-
-  const handleSaveEdit = () => {
-    // Just exit edit mode - changes are already applied
-    setEditingIndex(null);
-    setSelectedBassNote(null);
-  };
-
-  const handleCancelEdit = () => {
-    // Exit edit mode without changes
-    setEditingIndex(null);
-    setSelectedBassNote(null);
-  };
-
-  const handleDeleteCard = () => {
-    if (editingIndex === null) return;
-
-    deleteSavedChord(editingIndex);
-
-    // Exit edit mode
-    setEditingIndex(null);
-    setSelectedBassNote(null);
   };
 
   const handleIncreaseBeats = (index: number) => {
