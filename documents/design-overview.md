@@ -15,7 +15,6 @@ This document describes the **frontend-only** system design for a deterministic 
 - State management with persistence (Zustand stores)
 
 ❌ **Not Yet Implemented:**
-- Scale matching by note set (Scale Finder placeholder exists)
 - Mode discovery by rotation + catalog lookup (uses pre-computed inversions map instead)
 - Scale matching for a pair of triads
 - Similar-scale search by set distance
@@ -26,6 +25,10 @@ This document describes the **frontend-only** system design for a deterministic 
 - Real-time playback visualization
 - Scale relatives analysis (1st/2nd degree alterations)
 - Triad extension analysis (#5, b5, 6, 7, maj7)
+- Scale Finder with note/chord/chord-type search modes
+- Chord Search (find common chords across multiple scales)
+- Sequence Builder (chord progression builder with intelligent recommendations)
+- Comprehensive chord parser with slash chord support
 
 No backend services are used.
 
@@ -104,11 +107,11 @@ Optional supporting indexes:
 
 ### 4.1 Parsing and normalization (Notes)
 
-**Status: ❌ NOT IMPLEMENTED**
+**Status: ✅ FULLY IMPLEMENTED**
 
 **Goal:** Convert user input tokens into a pitch-class set.
 
-**Proposed Method:**
+**Implementation:** (`src/music/notes.ts`)
 1. Tokenize user string (comma/space-separated).
 2. Parse each token into a pitch class:
     - Base letter A–G
@@ -117,11 +120,21 @@ Optional supporting indexes:
 3. Convert to pitch class (mod 12).
 4. Aggregate into set (deduplicate).
 
-**Outputs:**
-- `inputSet` (pitch-class set)
-- parse errors (invalid tokens) for UI feedback
+**Function:**
+```typescript
+export function parseNotes(input: string): {
+  notes: string[];
+  pitchClasses: Set<number>;
+  errors: string[];
+}
+```
 
-**Current State:** Scale Finder page exists but is only a placeholder. No note parsing logic has been implemented.
+**Outputs:**
+- `notes` (array of parsed note names)
+- `pitchClasses` (pitch-class set)
+- `errors` (invalid tokens) for UI feedback
+
+**Current State:** Fully implemented in Scale Finder page with three search modes: notes, chords, and chord types.
 
 ---
 
@@ -142,29 +155,51 @@ Optional supporting indexes:
 
 ### 4.3 Scale matching by notes (Scale Finder)
 
-**Status: ❌ NOT IMPLEMENTED**
+**Status: ✅ FULLY IMPLEMENTED**
 
 **Goal:** Find all concrete scales that contain the user's note set.
 
+**Implementation:** (`src/music/scaleFinder.ts`)
+
 **Inputs:**
-- `inputSet`
+- `inputPitchClasses` (Set<number>)
 - catalog scale types
+- preferSharps (boolean)
 
 **Method:**
+```typescript
+export function findScalesContaining(
+  inputPitchClasses: Set<number>,
+  scaleTypes: ScaleType[],
+  preferSharps: boolean = true
+): ScaleMatch[]
+```
+
 For each scale type `T`:
 - For each root `r` in 0..11:
     - Build `scaleSet(T, r)`
     - Match rule: `inputSet ⊆ scaleSet`
+    - Calculate extra notes count
 
-**Ranking (recommended):**
-- Minimal “extra notes” first: `|scaleSet| - |inputSet|`
-- Optional: prefer smaller scales, then stable ordering by family/name
+**Ranking (implemented):**
+- Minimal "extra notes" first: `|scaleSet| - |inputSet|`
+- Secondary sort by scale name (stable ordering)
 
-**Outputs per match:**
-- scale type (id/name)
-- root
-- scale notes
-- extra notes count (optional)
+**Outputs per match (ScaleMatch interface):**
+- scaleType (full type object)
+- root (pitch class 0-11)
+- rootNoteName (string)
+- scaleNotes (array of note names)
+- scalePitchClasses (Set<number>)
+- extraNotesCount (number)
+- matchedNotes (array of matched note names)
+
+**UI Features:**
+- Three search modes: Notes, Chords, Chord Types
+- Filters by root note and scale family
+- Real-time search as you type
+- Visual highlighting of matched vs. extra notes
+- Perfect match badges for scales with no extra notes
 
 ---
 
@@ -354,7 +389,208 @@ For a scale with N notes in order:
 - Explore harmonic relationships between scales
 - Navigate between closely related scale families
 
-### 4.9 Audio Playback System
+### 4.9 Chord Parsing
+
+**Status: ✅ FULLY IMPLEMENTED** (not in original design)
+
+**Goal:** Parse chord symbols into pitch class sets and support complex chord qualities.
+
+**Implementation:** (`src/music/chordParser.ts`)
+
+**Supported Chord Types:**
+- Triads: major, minor, diminished, augmented, sus2, sus4
+- 7th chords: maj7, m7, dim7, dominant 7, mmaj7, m7b5 (half-dim), aug7, 7sus4
+- 6th chords: 6, m6
+- Slash chords: C/E, Am/G, etc. (any chord with alternate bass note)
+
+**Method:**
+```typescript
+export function parseChord(input: string): Chord | null
+export function parseChords(input: string): ParseChordsResult
+```
+
+**Outputs (Chord interface):**
+- root (note name string)
+- rootPitchClass (0-11)
+- quality (chord quality identifier)
+- pitchClasses (Set<number> of all chord tones)
+- displayName (formatted chord symbol)
+- bass (optional bass note for slash chords)
+- bassPitchClass (optional bass pitch class)
+
+**Features:**
+- Flexible input parsing with multiple aliases per quality
+- Support for sharp and flat accidentals
+- Slash chord notation (C/E, Dm7/G)
+- Error reporting for invalid chord symbols
+- Combines multiple chords into union of pitch classes
+
+**Used By:**
+- Scale Finder (chord search mode)
+- Sequence Builder (chord selection)
+- Chord progression validation
+
+### 4.10 Chord Type Matching
+
+**Status: ✅ FULLY IMPLEMENTED** (not in original design)
+
+**Goal:** Find scales that contain specific triad qualities (e.g., "scales with major and minor triads").
+
+**Implementation:** (`src/music/chordTypeFinder.ts`)
+
+**Method:**
+```typescript
+export function findScalesByChordTypes(
+  requestedTypes: Set<TriadQuality>,
+  scaleTypes: ScaleType[],
+  preferSharps: boolean = true
+): ChordTypeMatch[]
+```
+
+1. For each scale type and root:
+    - Calculate all triads in the scale
+    - Determine which triad qualities are present
+2. Match scales where all requested types are found
+3. Rank by triad variety (more diverse types ranked higher)
+
+**Outputs (ChordTypeMatch interface):**
+- scaleType, root, rootNoteName, scaleNotes (standard scale info)
+- triadsFound (record mapping TriadQuality → count)
+
+**UI Features:**
+- Search by chord quality keywords (major, minor, dim, aug, sus2, sus4)
+- Displays count of each triad type in results
+- Highlights requested types vs. additional types found
+- Helps find scales for specific harmonic contexts
+
+**Use Cases:**
+- "Find scales with major and minor chords" → returns diatonic scales
+- "Find scales with major, minor, dim" → returns major/minor scales
+- "Find scales with augmented chords" → returns harmonic minor, whole tone, etc.
+
+### 4.11 Common Chords Across Scales
+
+**Status: ✅ FULLY IMPLEMENTED** (not in original design)
+
+**Goal:** Given multiple selected scales, find all chords (triads + extensions) that appear in all or most of them.
+
+**Implementation:** (`src/music/commonChords.ts`)
+
+**Method:**
+```typescript
+export function findCommonChords(
+  scales: SelectedScale[],
+  preferSharps: boolean = true
+): CommonChord[]
+```
+
+1. For each selected scale:
+    - Calculate all triads using `calculateTriads()`
+    - Generate chord symbols with extensions
+2. Track which scales contain each unique chord
+3. Return chords sorted by:
+    - Universal chords first (in all scales)
+    - Shared chords next (in 2+ scales)
+    - Unique chords last (in 1 scale only)
+
+**Outputs (CommonChord interface):**
+- symbol (chord symbol string, e.g., "Cmaj7")
+- count (number of scales containing this chord)
+- scaleNames (array of scale names containing it)
+
+**Statistics:**
+- total (total unique chords found)
+- universal (chords in all scales)
+- shared (chords in 2+ scales)
+- unique (chords in exactly 1 scale)
+
+**UI Features (ChordSearchPage):**
+- Select multiple scales by root and type
+- Real-time chord calculation
+- Visual categorization (universal/shared/unique)
+- Chord counts per scale
+- Remove individual scales or clear all
+
+**Use Cases:**
+- Find common ground between different scales
+- Identify pivot chords for modulation
+- Discover shared harmonic material
+- Build chord vocabularies for multi-scale contexts
+
+### 4.12 Chord Progression Builder
+
+**Status: ✅ FULLY IMPLEMENTED** (not in original design)
+
+**Goal:** Build chord progressions with intelligent recommendations based on selected scales and previous chords.
+
+**Implementation:** (`src/pages/sequence-builder/SequenceBuilderPage.tsx`, `src/store/sequenceBuilderStore.ts`)
+
+**Core Concepts:**
+
+**ChordState:**
+- chord (selected Chord object)
+- s1 (optional first scale: {scale: string, root: string})
+- s2 (optional second scale: {scale: string, root: string})
+- beats (duration: 1-6 beats)
+- saved (boolean: in sequence vs. draft)
+
+**Sequence Structure:**
+- savedSequence (array of saved ChordStates)
+- draft (current ChordState being edited)
+- Linear progression with ability to edit any saved cell
+
+**Features:**
+
+1. **Three Selection Tabs:**
+   - Chord tab: Browse and select chords filtered by scales
+   - Scale tab: Select first scale (S1) for filtering
+   - Scale 2 tab: Select second scale (S2) for additional filtering
+
+2. **Intelligent Chord Filtering:**
+   - If S1 selected: show only chords that fit in S1
+   - If S1 and S2 selected: show chords in intersection of both scales
+   - Color-coded recommendations (exact match, contains notes, good fit)
+
+3. **Bass Note Selector:**
+   - Available bass notes determined by selected scales
+   - Creates slash chords when non-root bass selected
+   - Visual selector with scale-derived note options
+
+4. **Beat Duration Controls:**
+   - Adjustable per chord (1-6 beats)
+   - Visual beat indicators
+   - Affects playback timing
+
+5. **Edit Mode:**
+   - Click edit icon on any saved chord
+   - Modify chord, scales, or beats
+   - Save or cancel changes
+   - Delete button available in edit mode
+
+6. **Playback:**
+   - Play individual chords (click chord display)
+   - Play entire sequence (respects beat durations)
+   - Contextual playback (plays N previous chords before current)
+   - Visual highlighting of currently playing chord
+
+7. **State Persistence:**
+   - Saves to sessionStorage
+   - Preserves sequence across page reloads
+   - Lost on browser close (intentional for drafting)
+
+**Components:**
+- ChordTable: Displays filterable chord grid with scale-based coloring
+- ScaleTable: Displays scales with chord-fit indicators
+- Sequence display: Horizontal scrolling timeline of cards
+
+**Use Cases:**
+- Compose chord progressions interactively
+- Explore chords within scale constraints
+- Build modulating progressions (switch scales mid-sequence)
+- Experiment with slash chords and alternate bass notes
+- Hear progressions with realistic timing
+
+### 4.13 Audio Playback System
 
 **Status: ✅ FULLY IMPLEMENTED** (major addition not in original design)
 
@@ -507,9 +743,37 @@ Pure logic modules. No UI state. No side effects.
    - `analyzeScale(intervals)` - returns characteristic tags
    - Tags include: major/minor, has7th, hasMaj7, has6, etc.
 
+6. **chordParser.ts** - Chord symbol parsing
+   - `parseChord(input)` - parses single chord symbol
+   - `parseChords(input)` - parses multiple chords from input string
+   - `getSupportedChordTypes()` - returns list of supported chord types
+   - Supports triads, 7th chords, 6th chords, and slash chords
+
+7. **scaleFinder.ts** - Scale matching
+   - `findScalesContaining(pitchClasses, scaleTypes, preferSharps)` - finds scales containing notes
+   - Returns ranked results by fewest extra notes
+
+8. **chordTypeFinder.ts** - Chord type matching
+   - `findScalesByChordTypes(types, scaleTypes, preferSharps)` - finds scales with specific triad qualities
+   - `parseChordTypes(input)` - parses chord quality keywords
+   - `getTriadQualityDisplayName(quality)` - formats quality names
+
+9. **commonChords.ts** - Multi-scale chord analysis
+   - `findCommonChords(scales, preferSharps)` - finds chords common across multiple scales
+   - `getCommonChordsStats(chords, scaleCount)` - calculates statistics
+
+10. **chordProgression.ts** - Chord progression utilities
+    - `createChordState(...)` - creates ChordState objects
+    - `chordToNotes(chord)` - converts Chord to note names array
+
+11. **chordScaleChecker.ts** - Chord-scale fit validation
+    - Checks if chords fit within selected scales
+    - Returns fit quality (exact, contains, good)
+
+12. **chordFilter.ts** - Chord filtering by scale constraints
+    - Filters chord lists based on scale selections
+
 **NOT Implemented:**
-- ❌ `parseNotes(input)` - note parsing from user input
-- ❌ `findScalesContaining(set)` - scale finder algorithm
 - ❌ `findScalesForTriadPair(...)` - triad pair matching
 - ❌ `findSimilarScales(...)` - similarity search
 
@@ -534,27 +798,52 @@ Pure logic modules. No UI state. No side effects.
 2. **ScalePage** (`/scale/:scaleId` route) - ✅ FULLY WORKING
    - Two-column layout (left: controls, right: details)
    - Pattern selector (ascending/descending/alternating/ladder)
-   - Root selector
+   - Root selector (via query param `?root=N`)
    - ScaleCard display
    - TriadsSection with all triads + extensions
    - RelativesSection showing 1st/2nd degree relatives
    - Full audio playback integration
+   - Shareable URLs with scale ID and root
 
-3. **ScaleFinderPage** (`/scale-finder` route) - ❌ PLACEHOLDER
-   - Shows "Coming Soon" message
-   - Lists planned features but not implemented
+3. **ScaleFinderPage** (`/scale-finder` route) - ✅ FULLY WORKING
+   - Three search modes: Notes, Chords, Chord Types
+   - Real-time search as you type
+   - Parse errors displayed for invalid input
+   - Filters by root note and scale family
+   - Results sorted by relevance
+   - Visual highlighting of matched vs. extra notes
+   - Clickable results navigate to scale detail page
+   - Examples and help text for each mode
 
-4. **ScaleDetailsPage** (`/scale-details` route) - ❌ PLACEHOLDER
-   - Redundant with ScalePage
+4. **ChordSearchPage** (`/chord-search` route) - ✅ FULLY WORKING (new feature)
+   - Add multiple scales by root and type
+   - Real-time common chord calculation
+   - Visual categorization (universal/shared/unique)
+   - Statistics display (total/universal/shared counts)
+   - Remove individual scales or clear all
+   - Chord counts per category
+
+5. **SequenceBuilderPage** (`/sequence-builder` route) - ✅ FULLY WORKING (new feature)
+   - Horizontal timeline of chord cards
+   - Three-tab selector (Chord/Scale/Scale2)
+   - Bass note selector with scale-aware options
+   - Beat duration controls (1-6 beats per chord)
+   - Edit mode for modifying saved chords
+   - Delete last chord or clear entire sequence
+   - Play individual chords or full sequence
+   - Visual playback highlighting
+   - State persistence in sessionStorage
 
 **Reusable Components:**
 
-- **Layout.tsx** - App shell with header/navigation
+- **Layout.tsx** - App shell with header/navigation, links to all pages
 - **ScaleCard.tsx** - Scale display card with playback controls
 - **TriadsSection.tsx** - Triads grid with chord/arpeggio playback
 - **RelativesSection.tsx** - Related scales display
 - **PatternSelector.tsx** - Pattern selection radio buttons
 - **RouteGuard.tsx** - Conditional rendering based on data loading state
+- **ScaleTable.tsx** - Grid of scales with filtering and chord-fit indicators (used in Sequence Builder)
+- **ChordTable.tsx** - Grid of chords with filtering and scale-fit indicators (used in Sequence Builder)
 
 **Navigation:**
 - React Router with basename `/scale-master` for GitHub Pages
@@ -609,6 +898,20 @@ Pure logic modules. No UI state. No side effects.
    ```
    - Updated in real-time during playback
    - Used for UI highlighting of current note
+
+4. **sequenceBuilderStore.ts** - Chord sequence state (persisted to sessionStorage)
+   ```typescript
+   interface SequenceBuilderState {
+     savedSequence: ChordState[];  // Saved chord cells
+     draft: ChordState | null;     // Current draft cell
+     selectedChord: Chord | null;  // Currently selected chord
+     // Actions: setSelectedChord, selectChord, saveDraft,
+     // moveToPrevious, clearSequence
+   }
+   ```
+   - Persisted to sessionStorage (clears on browser close)
+   - Preserves chord progressions across page navigation
+   - Manages linear sequence with edit capabilities
 
 **State Flow:**
 - Catalog loads once on app init
@@ -669,27 +972,53 @@ Additional service layers not in original design:
 5. Play individual triads with extensions
 6. Switch between chord and arpeggio playback modes
 
+**Flow 4: Scale Finder Search** ✅ (Previously marked as not implemented)
+1. User enters notes, chords, or chord types in Scale Finder
+2. App parses input and identifies pitch classes or qualities
+3. Search algorithm finds matching scales from catalog
+4. Results displayed sorted by relevance (fewest extra notes or triad variety)
+5. User filters by root note or scale family
+6. Click result → navigate to scale detail page with selected root
+
+**Flow 5: Common Chords Discovery** ✅ (New Feature)
+1. User visits Chord Search page
+2. Add multiple scales by selecting root and type
+3. App calculates all chords (triads + extensions) in each scale
+4. Displays common chords categorized:
+   - Universal (in all scales)
+   - Shared (in 2+ scales)
+   - Unique (in 1 scale)
+4. Shows statistics and scale membership for each chord
+5. Remove scales or clear all to re-calculate
+
+**Flow 6: Chord Progression Building** ✅ (New Feature)
+1. User visits Sequence Builder page
+2. Optionally select scale(s) to constrain chord choices
+3. Browse filtered chord table (color-coded by scale fit)
+4. Optionally select alternate bass note
+5. Click chord → adds to draft cell, plays with context
+6. Adjust beat duration if needed
+7. Save to sequence → creates new draft
+8. Repeat to build progression
+9. Edit any saved chord by clicking edit icon
+10. Play individual chords or full sequence
+11. Sequence persists in sessionStorage
+
 ### 6.2 NOT Implemented Flows
 
-**Flow 4: Notes → Scales** ❌
-1. ~~Parse note tokens → inputSet~~
-2. ~~Search catalog → matching scales list~~
-3. ~~Display sorted results~~
-- Scale Finder page is placeholder only
-
-**Flow 5: Two Triads → Scales** ❌
+**Flow 7: Two Triads → Scales** ❌
 1. ~~Build two triad sets~~
 2. ~~Union into constraint set~~
 3. ~~Search scales containing constraint~~
 4. ~~Map triads to degrees~~
 - No triad pair matching feature
 
-**Flow 6: Scale → Similar Scales** ❌
+**Flow 8: Scale → Similar Scales** ❌
 1. ~~Compute target scale set~~
 2. ~~Compare against catalog~~
 3. ~~Filter by distance~~
 4. ~~Display diffs~~
-- No similarity search feature
+- No similarity search feature (but see Scale Relatives for similar functionality)
 
 ---
 
@@ -765,14 +1094,7 @@ These policies were decided during implementation:
 
 ### High Priority (Core Features from Original Design)
 
-1. **Scale Finder** (Section 4.1, 4.3)
-   - Implement note input parsing
-   - Implement scale matching algorithm
-   - Build Scale Finder UI page
-   - Add ranking by "minimal extra notes"
-   - User Story: US-07, US-08, US-09
-
-2. **Dynamic Mode Discovery** (Section 4.4 original design)
+1. **Dynamic Mode Discovery** (Section 4.4 original design)
    - Implement interval rotation algorithm
    - Build ScaleTypeByIntervalKey index
    - Add runtime mode resolution as fallback when inversions map missing
@@ -848,4 +1170,4 @@ These policies were decided during implementation:
 
 ---
 End of document.
-Last updated: 2026-02-01
+Last updated: 2026-02-10 (major update: documented Scale Finder, Chord Search, and Sequence Builder implementations)
