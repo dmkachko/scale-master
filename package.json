@@ -12,6 +12,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "immer": "^11.1.4",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",

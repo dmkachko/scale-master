@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import clsx from 'clsx';
 import type { Catalog } from '../types/catalog';
 import type { Chord } from '../music/chordParser';
 import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../music/notes';
@@ -101,7 +102,11 @@ export default function ScaleTable({
                         <td key={root} className={styles.scaleCell}>
                           <button
                             onClick={() => fitsChord && onSelectScale(scaleType.name, root)}
-                            className={`${styles.scaleCellButton} ${isSelected ? styles.selectedScaleCell : ''} ${!fitsChord ? styles.disabledScaleCell : ''}`}
+                            className={clsx(
+                              styles.scaleCellButton,
+                              isSelected && styles.selectedScaleCell,
+                              !fitsChord && styles.disabledScaleCell
+                            )}
                             disabled={!fitsChord}
                             title={
                               fitsChord

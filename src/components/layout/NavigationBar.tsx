@@ -3,6 +3,7 @@
  * Main navigation with links and settings button
  */
 
+import clsx from 'clsx';
 import { Link, useLocation } from 'react-router-dom';
 
 interface NavItem {
@@ -33,7 +34,7 @@ export default function NavigationBar({
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+                  className={clsx('nav-link', location.pathname === item.path && 'active')}
                 >
                   {item.label}
                 </Link>

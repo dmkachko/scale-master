@@ -3,6 +3,7 @@
  * Find common chords across multiple selected scales
  */
 
+import clsx from 'clsx';
 import { useState } from 'react';
 import { useCatalogStore } from '../../store/catalogStore.ts';
 import { usePreferencesStore } from '../../store/preferencesStore.ts';
@@ -198,13 +199,14 @@ function ChordSearchPage() {
               {commonChords.map((chord, index) => (
                 <div
                   key={index}
-                  className={`chord-card ${
+                  className={clsx(
+                    'chord-card',
                     chord.count === scales.length
                       ? 'universal'
                       : chord.count >= 2
                       ? 'shared'
                       : 'unique'
-                  }`}
+                  )}
                 >
                   <div className="chord-card-header">
                     <h3 className="chord-symbol">{chord.symbol}</h3>

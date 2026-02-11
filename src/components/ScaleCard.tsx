@@ -3,6 +3,7 @@
  * Displays a scale with its intervals, notes, degrees, and modal relationships
  */
 
+import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { calculateScaleNotes, addOctavesToNotes } from '../music/notes';
 import { analyzeScaleCharacteristics } from '../music/characteristics';
@@ -83,7 +84,7 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
   return (
     <div
       id={scale.id}
-      className={`scale-card${highlighted ? ' highlighted' : ''}`}
+      className={clsx('scale-card', highlighted && 'highlighted')}
     >
       <div className="scale-card-header">
         <h3>{scale.name}</h3>
@@ -112,7 +113,7 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
       <div className="scale-card-controls">
         <button
           onClick={handlePlayAll}
-          className={`play-all-button ${isPlaying ? 'playing' : ''}`}
+          className={clsx('play-all-button', isPlaying && 'playing')}
           aria-label={isPlaying ? 'Stop playback' : 'Play all scale steps'}
         >
           {isPlaying ? (
@@ -145,7 +146,7 @@ function ScaleCard({ scale, rootNote, highlighted = false, onNavigate, showMoreL
               <button
                 key={idx}
                 onClick={() => handlePlayNote(notesWithOctaves[idx])}
-                className={`note-cell note-name-cell ${isCurrentNote ? 'playing' : ''}`}
+                className={clsx('note-cell', 'note-name-cell', isCurrentNote && 'playing')}
                 aria-label={`Play ${note}`}
                 disabled={isPlaying}
               >

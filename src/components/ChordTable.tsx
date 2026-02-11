@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import clsx from 'clsx';
 import { Save } from 'lucide-react';
 import { parseChord, type Chord } from '../music/chordParser';
 import { NOTE_NAMES_SHARP, NOTE_NAMES_FLAT } from '../music/notes';
@@ -108,7 +109,7 @@ export default function ChordTable({
                   <button
                     onClick={() => onSelectChord(chord)}
                     onDoubleClick={() => onAddChord?.(chord)}
-                    className={`${styles.chordPill} ${isSelected ? styles.selectedPill : ''}`}
+                    className={clsx(styles.chordPill, isSelected && styles.selectedPill)}
                     title={`${chord.displayName}${onAddChord ? ' (double-click to add)' : ''}`}
                   >
                     {chord.displayName}

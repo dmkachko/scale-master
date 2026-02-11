@@ -3,6 +3,7 @@
  * Allows selection of bass note for slash chords
  */
 
+import clsx from 'clsx';
 import styles from '../SequenceBuilderPage.module.css';
 
 interface BassNoteSelectorProps {
@@ -22,7 +23,7 @@ export default function BassNoteSelector({
       <div className={styles.bassNotes}>
         <button
           onClick={() => onBassNoteChange(null)}
-          className={`${styles.bassNote} ${selectedBassNote === null ? styles.selectedBassNote : ''}`}
+          className={clsx(styles.bassNote, selectedBassNote === null && styles.selectedBassNote)}
           title="Use chord root as bass"
         >
           Root
@@ -31,7 +32,7 @@ export default function BassNoteSelector({
           <button
             key={note}
             onClick={() => onBassNoteChange(note)}
-            className={`${styles.bassNote} ${selectedBassNote === note ? styles.selectedBassNote : ''}`}
+            className={clsx(styles.bassNote, selectedBassNote === note && styles.selectedBassNote)}
           >
             {note}
           </button>

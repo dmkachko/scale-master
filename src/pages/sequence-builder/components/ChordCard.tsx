@@ -3,6 +3,7 @@
  * Displays a chord card in the sequence with controls for editing, playback, and beat management
  */
 
+import clsx from 'clsx';
 import { Pencil, Check, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Chord } from '../../../music/chordParser';
 import styles from '../SequenceBuilderPage.module.css';
@@ -63,13 +64,14 @@ export default function ChordCard({
 
   return (
     <div
-      className={`${styles.stateCard} ${
-        isDraft ? styles.currentCard : ''
-      } ${isSaved ? styles.savedCard : ''} ${
-        isPlaying ? styles.playingCard : ''
-      } ${isEditing ? styles.editingCard : ''} ${
-        isDisabled ? styles.disabledCard : ''
-      }`}
+      className={clsx(
+        styles.stateCard,
+        isDraft && styles.currentCard,
+        isSaved && styles.savedCard,
+        isPlaying && styles.playingCard,
+        isEditing && styles.editingCard,
+        isDisabled && styles.disabledCard
+      )}
     >
       {/* Card Number and Edit Button */}
       <div className={styles.stateNumber}>
@@ -93,7 +95,7 @@ export default function ChordCard({
         {/* Chord Display */}
         <div className={styles.chordRow}>
           <div
-            className={`${styles.chordDisplay} ${!state.chord ? styles.emptyChord : ''}`}
+            className={clsx(styles.chordDisplay, !state.chord && styles.emptyChord)}
             onClick={(e) => {
               e.stopPropagation();
               onPlayChord(state.chord, beats);
@@ -255,9 +257,10 @@ export default function ChordCard({
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className={`${styles.beat} ${
+              className={clsx(
+                styles.beat,
                 i < beats ? styles.activeBeat : styles.inactiveBeat
-              }`}
+              )}
             />
           ))}
         </div>

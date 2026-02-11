@@ -3,6 +3,7 @@
  * Displays all triads built on each scale degree with playback controls
  */
 
+import clsx from 'clsx';
 import {useState} from 'react';
 import {audioEngine} from '../../services/audioEngine.ts';
 import {calculateTriads, getTriadName, getTriadAbbreviation, type Triad} from '../../music/triads.ts';
@@ -267,7 +268,7 @@ function TriadsSection({scaleNotes, scaleIntervals, scaleFamily}: TriadsSectionP
                     return (
                         <div
                             key={index}
-                            className={`triad-card ${playingTriad === index ? 'playing' : ''}`}
+                            className={clsx('triad-card', playingTriad === index && 'playing')}
                         >
                             {showRomanNumerals && (
                                 <div className="triad-degree">{triad.romanNumeral}</div>

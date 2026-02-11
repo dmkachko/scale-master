@@ -3,6 +3,7 @@
  * Displays scales that can be produced by altering one step by a semitone
  */
 
+import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { findRelativeScales, findSecondDegreeRelatives, getModificationDescription } from '../../music/relatives.ts';
 import { calculateScaleNotes } from '../../music/notes.ts';
@@ -100,7 +101,7 @@ function RelativesSection({ currentScale, allScales, rootNote, preferSharps }: R
                     return (
                       <span
                         key={idx}
-                        className={`interval-badge ${colorClass}`}
+                        className={clsx('interval-badge', colorClass)}
                         title={tooltip}
                       >
                         {note}

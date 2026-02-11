@@ -3,6 +3,7 @@
  * Displays search results with match details
  */
 
+import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { getTriadQualityDisplayName } from '../../../music/chordTypeFinder';
 import type { SearchMode, SearchResult } from '../useScaleSearch';
@@ -117,9 +118,12 @@ export default function ResultsSection({
                     .map(([quality, count]) => (
                       <span
                         key={quality}
-                        className={`triad-type-chip ${parsedItems.some(item =>
-                          item.toLowerCase() === getTriadQualityDisplayName(quality as any).toLowerCase()
-                        ) ? 'matched' : ''}`}
+                        className={clsx(
+                          'triad-type-chip',
+                          parsedItems.some(item =>
+                            item.toLowerCase() === getTriadQualityDisplayName(quality as any).toLowerCase()
+                          ) && 'matched'
+                        )}
                       >
                         {getTriadQualityDisplayName(quality as any)} ×{count}
                       </span>
@@ -132,7 +136,7 @@ export default function ResultsSection({
                     return (
                       <span
                         key={i}
-                        className={`note-chip ${isMatched ? 'matched' : 'extra'}`}
+                        className={clsx('note-chip', isMatched ? 'matched' : 'extra')}
                       >
                         {note}
                       </span>
