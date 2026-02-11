@@ -14,8 +14,19 @@ import './ScaleCatalogPage.css';
 function ScaleCatalogPage() {
   useCatalogInit();
 
-  const { status, catalog, error, selectedRoot, setSelectedRoot, filterQuery, setFilterQuery } = useCatalogStore();
-  const accidentalPreference = usePreferencesStore((state) => state.accidentalPreference);
+  // Catalog state selectors
+  const status = useCatalogStore(state => state.status);
+  const catalog = useCatalogStore(state => state.catalog);
+  const error = useCatalogStore(state => state.error);
+  const selectedRoot = useCatalogStore(state => state.selectedRoot);
+  const filterQuery = useCatalogStore(state => state.filterQuery);
+
+  // Catalog actions
+  const setSelectedRoot = useCatalogStore(state => state.setSelectedRoot);
+  const setFilterQuery = useCatalogStore(state => state.setFilterQuery);
+
+  // Preferences
+  const accidentalPreference = usePreferencesStore(state => state.accidentalPreference);
   const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
 
   const [highlightedScaleId, setHighlightedScaleId] = useState<string | null>(null);

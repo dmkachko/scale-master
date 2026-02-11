@@ -20,8 +20,9 @@ import './ChordSearchPage.css';
 function ChordSearchPage() {
   useCatalogInit();
 
-  const { catalog } = useCatalogStore();
-  const { accidentalPreference } = usePreferencesStore();
+  // Store selectors
+  const catalog = useCatalogStore(state => state.catalog);
+  const accidentalPreference = usePreferencesStore(state => state.accidentalPreference);
   const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
 
   const [selectedRoot, setSelectedRoot] = useState<number>(0);

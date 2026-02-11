@@ -16,26 +16,31 @@ import styles from './SequenceBuilderPage.module.css';
 export default function SequenceBuilderPage() {
   useCatalogInit();
 
-  const {
-    savedSequence,
-    draft,
-    selectChord,
-    saveDraft,
-    moveToPrevious,
-    clearSequence,
-    setDraftScale,
-    clearDraftScale,
-    clearDraftChord,
-    updateSavedChord,
-    updateSavedScale,
-    clearSavedScale,
-    deleteSavedChord,
-    updateBeats,
-    updateDraftBeats,
-  } = useSequenceBuilderStore();
+  // SequenceBuilder state selectors
+  const savedSequence = useSequenceBuilderStore(state => state.savedSequence);
+  const draft = useSequenceBuilderStore(state => state.draft);
 
-  const { tempo, accidentalPreference, chordSelectionPlaybackCount } = usePreferencesStore();
-  const { catalog } = useCatalogStore();
+  // SequenceBuilder actions
+  const selectChord = useSequenceBuilderStore(state => state.selectChord);
+  const saveDraft = useSequenceBuilderStore(state => state.saveDraft);
+  const moveToPrevious = useSequenceBuilderStore(state => state.moveToPrevious);
+  const clearSequence = useSequenceBuilderStore(state => state.clearSequence);
+  const setDraftScale = useSequenceBuilderStore(state => state.setDraftScale);
+  const clearDraftScale = useSequenceBuilderStore(state => state.clearDraftScale);
+  const clearDraftChord = useSequenceBuilderStore(state => state.clearDraftChord);
+  const updateSavedChord = useSequenceBuilderStore(state => state.updateSavedChord);
+  const updateSavedScale = useSequenceBuilderStore(state => state.updateSavedScale);
+  const deleteSavedChord = useSequenceBuilderStore(state => state.deleteSavedChord);
+  const updateBeats = useSequenceBuilderStore(state => state.updateBeats);
+  const updateDraftBeats = useSequenceBuilderStore(state => state.updateDraftBeats);
+
+  // Preferences selectors
+  const tempo = usePreferencesStore(state => state.tempo);
+  const accidentalPreference = usePreferencesStore(state => state.accidentalPreference);
+  const chordSelectionPlaybackCount = usePreferencesStore(state => state.chordSelectionPlaybackCount);
+
+  // Catalog selector
+  const catalog = useCatalogStore(state => state.catalog);
 
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);

@@ -26,8 +26,10 @@ type SearchResult = ScaleMatch | ChordTypeMatch;
 function ScaleFinderPage() {
   useCatalogInit();
 
-  const { catalog } = useCatalogStore();
-  const { accidentalPreference } = usePreferencesStore();
+  // Store selectors
+  const catalog = useCatalogStore(state => state.catalog);
+  const accidentalPreference = usePreferencesStore(state => state.accidentalPreference);
+
   const [searchMode, setSearchMode] = useState<SearchMode>('notes');
   const [input, setInput] = useState('');
   const [matches, setMatches] = useState<SearchResult[]>([]);

@@ -21,8 +21,16 @@ function ScalePage() {
   useCatalogInit();
   const { scaleId } = useParams<{ scaleId: string }>();
   const [searchParams] = useSearchParams();
-  const { catalog, selectedRoot, setSelectedRoot } = useCatalogStore();
-  const { playbackPattern, setPlaybackPattern, accidentalPreference } = usePreferencesStore();
+
+  // Catalog selectors
+  const catalog = useCatalogStore(state => state.catalog);
+  const selectedRoot = useCatalogStore(state => state.selectedRoot);
+  const setSelectedRoot = useCatalogStore(state => state.setSelectedRoot);
+
+  // Preferences selectors
+  const playbackPattern = usePreferencesStore(state => state.playbackPattern);
+  const setPlaybackPattern = usePreferencesStore(state => state.setPlaybackPattern);
+  const accidentalPreference = usePreferencesStore(state => state.accidentalPreference);
   const noteNames = accidentalPreference === 'sharps' ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
 
   // Handle root query parameter from Scale Finder

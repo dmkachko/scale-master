@@ -16,20 +16,22 @@ interface LayoutProps {
 function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const {
-    accidentalPreference,
-    setAccidentalPreference,
-    timeSignature,
-    setTimeSignature,
-    tempo,
-    setTempo,
-    chordSelectionPlaybackCount,
-    setChordSelectionPlaybackCount,
-    synthSettings,
-    setSynthVolume,
-    velocitySettings,
-    setVelocity,
-  } = usePreferencesStore();
+
+  // State selectors (only re-render when these specific values change)
+  const accidentalPreference = usePreferencesStore(state => state.accidentalPreference);
+  const timeSignature = usePreferencesStore(state => state.timeSignature);
+  const tempo = usePreferencesStore(state => state.tempo);
+  const chordSelectionPlaybackCount = usePreferencesStore(state => state.chordSelectionPlaybackCount);
+  const synthSettings = usePreferencesStore(state => state.synthSettings);
+  const velocitySettings = usePreferencesStore(state => state.velocitySettings);
+
+  // Actions (stable references, won't cause re-renders)
+  const setAccidentalPreference = usePreferencesStore(state => state.setAccidentalPreference);
+  const setTimeSignature = usePreferencesStore(state => state.setTimeSignature);
+  const setTempo = usePreferencesStore(state => state.setTempo);
+  const setChordSelectionPlaybackCount = usePreferencesStore(state => state.setChordSelectionPlaybackCount);
+  const setSynthVolume = usePreferencesStore(state => state.setSynthVolume);
+  const setVelocity = usePreferencesStore(state => state.setVelocity);
 
   const navItems = [
     { path: '/', label: 'Scale Catalog' },
