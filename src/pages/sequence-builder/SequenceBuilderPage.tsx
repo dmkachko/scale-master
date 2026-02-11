@@ -23,6 +23,15 @@ export default function SequenceBuilderPage() {
     saveDraft,
     moveToPrevious,
     clearSequence,
+    setDraftScale,
+    clearDraftScale,
+    clearDraftChord,
+    updateSavedChord,
+    updateSavedScale,
+    clearSavedScale,
+    deleteSavedChord,
+    updateBeats,
+    updateDraftBeats,
   } = useSequenceBuilderStore();
 
   const { tempo, accidentalPreference, chordSelectionPlaybackCount } = usePreferencesStore();
@@ -105,37 +114,17 @@ export default function SequenceBuilderPage() {
 
   const handleSelectScale = (scaleName: string, root: string) => {
     if (editingIndex !== null) {
-      // Update editing card's s1
-      useSequenceBuilderStore.setState((state) => ({
-        savedSequence: state.savedSequence.map((item, i) =>
-          i === editingIndex ? { ...item, s1: { scale: scaleName, root } } : item
-        ),
-      }));
+      updateSavedScale(editingIndex, 's1', scaleName, root);
     } else {
-      // Update draft's s1 field with the selected scale
-      useSequenceBuilderStore.setState((state) => ({
-        draft: state.draft
-          ? { ...state.draft, s1: { scale: scaleName, root } }
-          : null,
-      }));
+      setDraftScale('s1', scaleName, root);
     }
   };
 
   const handleSelectScale2 = (scaleName: string, root: string) => {
     if (editingIndex !== null) {
-      // Update editing card's s2
-      useSequenceBuilderStore.setState((state) => ({
-        savedSequence: state.savedSequence.map((item, i) =>
-          i === editingIndex ? { ...item, s2: { scale: scaleName, root } } : item
-        ),
-      }));
+      updateSavedScale(editingIndex, 's2', scaleName, root);
     } else {
-      // Update draft's s2 field with the selected scale
-      useSequenceBuilderStore.setState((state) => ({
-        draft: state.draft
-          ? { ...state.draft, s2: { scale: scaleName, root } }
-          : null,
-      }));
+      setDraftScale('s2', scaleName, root);
     }
   };
 
@@ -198,14 +187,8 @@ export default function SequenceBuilderPage() {
 
     // Update the appropriate target (editing card or draft)
     if (editingIndex !== null) {
-      // Update the saved sequence item
-      useSequenceBuilderStore.setState((state) => ({
-        savedSequence: state.savedSequence.map((item, i) =>
-          i === editingIndex ? { ...item, chord: finalChord } : item
-        ),
-      }));
+      updateSavedChord(editingIndex, finalChord);
     } else {
-      // Update draft
       selectChord(finalChord);
     }
 
@@ -311,27 +294,15 @@ export default function SequenceBuilderPage() {
 
   const handleClearDraftChord = () => {
     setSelectedBassNote(null);
-    useSequenceBuilderStore.setState((state) => ({
-      draft: state.draft
-        ? { ...state.draft, chord: null }
-        : null,
-    }));
+    clearDraftChord();
   };
 
   const handleClearS1 = () => {
-    useSequenceBuilderStore.setState((state) => ({
-      draft: state.draft
-        ? { ...state.draft, s1: undefined }
-        : null,
-    }));
+    clearDraftScale('s1');
   };
 
   const handleClearS2 = () => {
-    useSequenceBuilderStore.setState((state) => ({
-      draft: state.draft
-        ? { ...state.draft, s2: undefined }
-        : null,
-    }));
+    clearDraftScale('s2');
   };
 
   const handleBassNoteChange = (bassNote: string | null) => {
@@ -366,14 +337,8 @@ export default function SequenceBuilderPage() {
 
       // Update the appropriate target
       if (editingIndex !== null) {
-        // Update the saved sequence item
-        useSequenceBuilderStore.setState((state) => ({
-          savedSequence: state.savedSequence.map((item, i) =>
-            i === editingIndex ? { ...item, chord: newChord } : item
-          ),
-        }));
+        updateSavedChord(editingIndex, newChord);
       } else {
-        // Update draft
         selectChord(newChord);
       }
 
@@ -417,10 +382,7 @@ export default function SequenceBuilderPage() {
   const handleDeleteCard = () => {
     if (editingIndex === null) return;
 
-    // Remove the card from sequence
-    useSequenceBuilderStore.setState((state) => ({
-      savedSequence: state.savedSequence.filter((_, i) => i !== editingIndex),
-    }));
+    deleteSavedChord(editingIndex);
 
     // Exit edit mode
     setEditingIndex(null);
@@ -432,17 +394,11 @@ export default function SequenceBuilderPage() {
     const maxBeats = 6;
 
     if (isDraft) {
-      useSequenceBuilderStore.setState((state) => ({
-        draft: state.draft
-          ? { ...state.draft, beats: Math.min((state.draft.beats || 4) + 1, maxBeats) }
-          : null,
-      }));
+      const currentBeats = draft?.beats || 4;
+      updateDraftBeats(Math.min(currentBeats + 1, maxBeats));
     } else {
-      useSequenceBuilderStore.setState((state) => ({
-        savedSequence: state.savedSequence.map((item, i) =>
-          i === index ? { ...item, beats: Math.min((item.beats || 4) + 1, maxBeats) } : item
-        ),
-      }));
+      const currentBeats = savedSequence[index]?.beats || 4;
+      updateBeats(index, Math.min(currentBeats + 1, maxBeats));
     }
   };
 
@@ -451,17 +407,11 @@ export default function SequenceBuilderPage() {
     const minBeats = 1;
 
     if (isDraft) {
-      useSequenceBuilderStore.setState((state) => ({
-        draft: state.draft
-          ? { ...state.draft, beats: Math.max((state.draft.beats || 4) - 1, minBeats) }
-          : null,
-      }));
+      const currentBeats = draft?.beats || 4;
+      updateDraftBeats(Math.max(currentBeats - 1, minBeats));
     } else {
-      useSequenceBuilderStore.setState((state) => ({
-        savedSequence: state.savedSequence.map((item, i) =>
-          i === index ? { ...item, beats: Math.max((item.beats || 4) - 1, minBeats) } : item
-        ),
-      }));
+      const currentBeats = savedSequence[index]?.beats || 4;
+      updateBeats(index, Math.max(currentBeats - 1, minBeats));
     }
   };
 
