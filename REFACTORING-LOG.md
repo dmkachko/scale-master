@@ -164,8 +164,26 @@ Large-scale refactoring to extract business entities to classes, consolidate ser
 - ✅ Reusable across multiple components
 - ✅ All builds passing
 
-### Phase 4: Global Hooks
-_(To be filled as changes are made)_
+### Phase 4: UI Component Extraction 🚧 IN PROGRESS
+**Started:** 2026-02-11
+**Commits:** 2 (partial completion)
+
+#### 4.1 ChordCard Component (1a4c745)
+- Extracted from SequenceBuilderPage
+- Encapsulates card rendering (chord, scales, beats)
+- Supports draft, saved, playing, editing states
+- 278 lines of reusable component logic
+
+#### 4.2 SequenceControls Component (10e4692)
+- Extracted sequence control buttons
+- Play, Delete Last, Clear functionality
+- 48 lines of control logic
+
+**Partial Results:**
+- ✅ 2 major components extracted
+- ✅ Foundation for further component modularization
+- ⏳ Remaining: Additional sub-components (can be done iteratively)
+- ✅ All builds passing
 
 ### Phase 5: Documentation & Cleanup
 _(To be filled as changes are made)_
@@ -174,7 +192,7 @@ _(To be filled as changes are made)_
 
 ## Metrics Summary
 
-### Files Created: 14
+### Files Created: 16
 **Entities (4 + 4 tests + 1 index):**
 - src/music/entities/Note.ts
 - src/music/entities/Chord.ts
@@ -193,6 +211,10 @@ _(To be filled as changes are made)_
 - src/hooks/useScaleGrouping.ts
 - src/hooks/useTriadPlayback.ts
 
+**Components (2):**
+- src/pages/sequence-builder/components/ChordCard.tsx
+- src/pages/sequence-builder/components/SequenceControls.tsx
+
 ### Files Modified: 6
 - REFACTORING-LOG.md
 - src/music/chordParser.ts (-70%)
@@ -201,10 +223,10 @@ _(To be filled as changes are made)_
 - src/music/scaleFinder.ts (refactored)
 - src/music/chordScaleChecker.ts (refactored)
 
-### Lines Added: ~3,550 (entities + hooks + tests)
+### Lines Added: ~3,876 (entities + hooks + components + tests)
 ### Lines Removed: ~600 (service simplification)
-### Net Change: +2,950 lines
-### Commits Made: 16 / 25 (64% complete)
+### Net Change: +3,276 lines
+### Commits Made: 19 / 25 (76% complete)
 
 ### Test Coverage
 - Before: (TBD)
