@@ -1,11 +1,12 @@
 /**
  * Chord-Scale Relationship Checker
- * Unified logic for checking if chords fit in scales
+ * Refactored to use Chord and Scale entities
  */
 
 import type { Chord } from './chordParser';
 import type { ScaleType } from '../types/catalog';
-import { getPitchClassFromNote } from './notes';
+import { Scale } from './entities/Scale';
+import { Note } from './entities/Note';
 
 /**
  * Calculate pitch classes for a scale given root and intervals
@@ -14,17 +15,12 @@ export function getScalePitchClasses(
   scaleRoot: string | number,
   scaleIntervals: number[]
 ): Set<number> {
-  const scaleRootPC = typeof scaleRoot === 'string'
-    ? getPitchClassFromNote(scaleRoot)
-    : scaleRoot;
+  const rootNote = typeof scaleRoot === 'string'
+    ? Note.fromString(scaleRoot)
+    : Note.fromPitchClass(scaleRoot);
 
-  const scalePitchClasses = new Set<number>();
-  for (const interval of scaleIntervals) {
-    const pitchClass = (scaleRootPC + interval) % 12;
-    scalePitchClasses.add(pitchClass);
-  }
-
-  return scalePitchClasses;
+  const scale = new Scale('temp', 'temp', 'temp', scaleIntervals, rootNote);
+  return scale.getPitchClasses();
 }
 
 /**
@@ -41,7 +37,11 @@ export function chordFitsInScale(
 ): boolean {
   if (!chord) return true; // No chord to check, consider it fits
 
-  const scalePitchClasses = getScalePitchClasses(scaleRoot, scaleIntervals);
+  const rootNote = typeof scaleRoot === 'string'
+    ? Note.fromString(scaleRoot)
+    : Note.fromPitchClass(scaleRoot);
+
+  const scale = new Scale('temp', 'temp', 'temp', scaleIntervals, rootNote);
   const chordPitchClasses = chord instanceof Set ? chord : chord.pitchClasses;
 
   if (!chordPitchClasses) return true; // No pitch classes to check
@@ -49,14 +49,8 @@ export function chordFitsInScale(
     return true; // Invalid format, don't filter
   }
 
-  // Check if all chord pitch classes are in the scale
-  for (const chordPC of chordPitchClasses) {
-    if (!scalePitchClasses.has(chordPC)) {
-      return false;
-    }
-  }
-
-  return true;
+  // Use scale's containsPitchClasses method
+  return scale.containsPitchClasses(chordPitchClasses);
 }
 
 /**
