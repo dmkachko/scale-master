@@ -124,8 +124,45 @@ Large-scale refactoring to extract business entities to classes, consolidate ser
 - ✅ 100% backward compatibility maintained
 - ✅ All builds passing
 
-### Phase 3: UI Component Extraction
-_(To be filled as changes are made)_
+### Phase 3: UI Hooks Extraction ✅ COMPLETE
+**Completed:** 2026-02-11
+**Commits:** 5
+
+#### 3.1 useChordPlayback Hook (163753c)
+- Extracted playback orchestration from SequenceBuilderPage
+- Functions: playChord, playSequence, playChordWithContext
+- Handles tempo-based duration, bass notes, cancellation
+- 180 lines of reusable playback logic
+
+#### 3.2 useSequenceManagement Hook (4c483d2)
+- Extracted draft/edit state management
+- Functions: handleSelectScale, handleSelectScale2, applyBassNote
+- Calculates availableBassNotes from selected scales
+- 186 lines of sequence management logic
+
+#### 3.3 useChordGrouping Hook (607d778)
+- Extracted chord organization from ChordTable
+- Groups chords by root note with scale filtering
+- Exports CHORD_GROUPS and QUALITY_LABELS constants
+- 101 lines of chord grouping logic
+
+#### 3.4 useScaleGrouping Hook (e4e4faf)
+- Extracted scale organization from ScaleTable
+- Groups scales by family with chord filtering
+- Exports FAMILY_LABELS and FAMILY_ORDER constants
+- 100 lines of scale grouping logic
+
+#### 3.5 useTriadPlayback Hook (f721809)
+- Extracted triad playback from TriadsSection
+- Handles octave wrapping and extension notes
+- Supports chord/arpeggio playback modes
+- 185 lines of triad playback logic
+
+**Results:**
+- ✅ 5 custom hooks created (~750 lines total)
+- ✅ Logic separated from UI components
+- ✅ Reusable across multiple components
+- ✅ All builds passing
 
 ### Phase 4: Global Hooks
 _(To be filled as changes are made)_
@@ -137,7 +174,8 @@ _(To be filled as changes are made)_
 
 ## Metrics Summary
 
-### Files Created: 9
+### Files Created: 14
+**Entities (4 + 4 tests + 1 index):**
 - src/music/entities/Note.ts
 - src/music/entities/Chord.ts
 - src/music/entities/Triad.ts
@@ -148,17 +186,25 @@ _(To be filled as changes are made)_
 - src/music/entities/__tests__/Triad.test.ts
 - src/music/entities/__tests__/Scale.test.ts
 
+**Hooks (5):**
+- src/hooks/useChordPlayback.ts
+- src/hooks/useSequenceManagement.ts
+- src/hooks/useChordGrouping.ts
+- src/hooks/useScaleGrouping.ts
+- src/hooks/useTriadPlayback.ts
+
 ### Files Modified: 6
 - REFACTORING-LOG.md
-- src/music/chordParser.ts
-- src/music/triads.ts
-- src/music/notes.ts
-- src/music/scaleFinder.ts
-- src/music/chordScaleChecker.ts
+- src/music/chordParser.ts (-70%)
+- src/music/triads.ts (-72%)
+- src/music/notes.ts (-43%)
+- src/music/scaleFinder.ts (refactored)
+- src/music/chordScaleChecker.ts (refactored)
 
-### Lines Added: ~2,800
+### Lines Added: ~3,550 (entities + hooks + tests)
 ### Lines Removed: ~600 (service simplification)
-### Commits Made: 11 / 25
+### Net Change: +2,950 lines
+### Commits Made: 16 / 25 (64% complete)
 
 ### Test Coverage
 - Before: (TBD)
