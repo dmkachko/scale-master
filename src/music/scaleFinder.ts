@@ -1,9 +1,11 @@
 /**
  * Scale Finder - Find scales containing a given set of notes
+ * Refactored to use Scale entity
  */
 
 import type { ScaleType } from '../types/catalog';
-import { getPitchClassFromNote } from './notes';
+import { Scale } from './entities/Scale';
+import { Note } from './entities/Note';
 
 export interface ScaleMatch {
   scaleType: ScaleType;
@@ -34,46 +36,31 @@ export function findScalesContaining(
     return [];
   }
 
-  const noteNames = preferSharps
-    ? ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    : ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-
   // Check each scale type with each possible root
   for (const scaleType of scaleTypes) {
-    for (let root = 0; root < 12; root++) {
-      // Calculate pitch classes for this scale
-      const scalePitchClasses = new Set<number>();
-      const scaleNotes: string[] = [];
+    for (let rootPitchClass = 0; rootPitchClass < 12; rootPitchClass++) {
+      // Create Scale entity for this root
+      const rootNote = Note.fromPitchClass(rootPitchClass, preferSharps);
+      const scale = Scale.fromType(scaleType, rootNote);
 
-      for (const interval of scaleType.intervals) {
-        const pitchClass = (root + interval) % 12;
-        scalePitchClasses.add(pitchClass);
-        scaleNotes.push(noteNames[pitchClass]);
-      }
+      // Check if scale contains all input pitch classes
+      if (scale.containsPitchClasses(inputPitchClasses)) {
+        const scalePitchClasses = scale.getPitchClasses();
+        const scaleNotes = scale.getNotesAsStrings(preferSharps);
 
-      // Check if all input pitch classes are contained in this scale
-      let isMatch = true;
-      for (const inputPC of inputPitchClasses) {
-        if (!scalePitchClasses.has(inputPC)) {
-          isMatch = false;
-          break;
-        }
-      }
-
-      if (isMatch) {
         // Calculate extra notes count
-        const extraNotesCount = scalePitchClasses.size - inputPitchClasses.size;
+        const extraNotesCount = scale.getExtraNotesCount(inputPitchClasses);
 
         // Get matched note names
         const matchedNotes = scaleNotes.filter((note) => {
-          const pc = getPitchClassFromNote(note);
-          return inputPitchClasses.has(pc);
+          const noteEntity = Note.fromString(note);
+          return inputPitchClasses.has(noteEntity.pitchClass);
         });
 
         matches.push({
           scaleType,
-          root,
-          rootNoteName: noteNames[root],
+          root: rootPitchClass,
+          rootNoteName: rootNote.name,
           scaleNotes,
           scalePitchClasses,
           extraNotesCount,
