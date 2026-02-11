@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Trash2, Pencil, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Chord } from '../../music/chordParser';
 import { parseChord } from '../../music/chordParser';
 import { useSequenceBuilderStore } from '../../store/sequenceBuilderStore';
@@ -11,6 +10,10 @@ import { useSequenceEdit } from './useSequenceEdit';
 import { useAvailableBassNotes } from './useAvailableBassNotes';
 import ScaleTable from '../../components/ScaleTable';
 import ChordTable from '../../components/ChordTable';
+import TabSelector from './components/TabSelector';
+import BassNoteSelector from './components/BassNoteSelector';
+import SequenceControls from './components/SequenceControls';
+import ChordCard from './components/ChordCard';
 import styles from './SequenceBuilderPage.module.css';
 
 export default function SequenceBuilderPage() {
@@ -253,250 +256,55 @@ export default function SequenceBuilderPage() {
           <div className={styles.sectionHeader}>
             <h2>Current Sequence</h2>
             <div className={styles.controls}>
-              {savedSequence.length > 0 && (
-                <button
-                  onClick={() => handlePlaySequence(savedSequence, draft)}
-                  className="btn btn-primary btn-sm"
-                >
-                  Play
-                </button>
-              )}
-              {savedSequence.length > 0 && (
-                <button
-                  onClick={() => {
-                    moveToPrevious();
-                    setSelectedBassNote(null);
-                  }}
-                  className="btn btn-secondary btn-sm"
-                  title="Delete last saved chord"
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-              <button
-                onClick={() => {
+              <SequenceControls
+                hasSequence={savedSequence.length > 0}
+                onPlay={() => handlePlaySequence(savedSequence, draft)}
+                onDeleteLast={() => {
+                  moveToPrevious();
+                  setSelectedBassNote(null);
+                }}
+                onClear={() => {
                   clearSequence();
                   setSelectedBassNote(null);
                 }}
-                className="btn btn-secondary btn-sm"
-              >
-                Clear
-              </button>
+              />
             </div>
           </div>
 
           <div className={styles.sequenceScroll} ref={scrollContainerRef}>
-            {(
-              <div className={styles.statesList}>
-                {allCells.map((state, index) => {
-                  const isDraft = index === allCells.length - 1; // Last cell is always draft
-                  const isSaved = state.saved;
-                  const isPlaying = playingIndex === index;
-                  const isEditing = editingIndex === index;
-                  const isDisabled = isDraft && editingIndex !== null;
+            <div className={styles.statesList}>
+              {allCells.map((state, index) => {
+                const isDraft = index === allCells.length - 1;
+                const isPlaying = playingIndex === index;
+                const isEditing = editingIndex === index;
+                const isDisabled = isDraft && editingIndex !== null;
 
-                  return (
-                    <div
-                      key={index}
-                      className={`${styles.stateCard} ${
-                        isDraft ? styles.currentCard : ''
-                      } ${isSaved ? styles.savedCard : ''} ${
-                        isPlaying ? styles.playingCard : ''
-                      } ${isEditing ? styles.editingCard : ''} ${
-                        isDisabled ? styles.disabledCard : ''
-                      }`}
-                    >
-                      <div className={styles.stateNumber}>
-                        {index + 1}
-                        {isSaved && !isEditing && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditCard(index);
-                            }}
-                            className={styles.editButton}
-                            title="Edit this card"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                        )}
-                      </div>
-                      <div className={styles.stateContent}>
-                        <div className={styles.chordRow}>
-                          <div
-                            className={`${styles.chordDisplay} ${!state.chord ? styles.emptyChord : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlayChord(state.chord, state.beats || 4);
-                            }}
-                          >
-                            {state.chord ? state.chord.displayName : '—'}
-                          </div>
-                          {isDraft && state.chord && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleClearDraftChord();
-                              }}
-                              className={styles.clearChordButton}
-                              title="Clear chord selection"
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                        <div className={styles.modePlaceholders}>
-                          <div className={styles.modePlaceholder}>
-                            <span className={styles.scaleLabel}>
-                              S1: {state.s1 ? (
-                                <span>{state.s1.root} {state.s1.scale}</span>
-                              ) : (
-                                <span className={styles.placeholderText}>—</span>
-                              )}
-                            </span>
-                            {isDraft && state.s1 && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleClearS1();
-                                }}
-                                className={styles.clearScaleButton}
-                                title="Clear scale 1"
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                          <div className={styles.modePlaceholder}>
-                            <span className={styles.scaleLabel}>
-                              S2: {state.s2 ? (
-                                <span>{state.s2.root} {state.s2.scale}</span>
-                              ) : (
-                                <span className={styles.placeholderText}>—</span>
-                              )}
-                            </span>
-                            {isDraft && state.s2 && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleClearS2();
-                                }}
-                                className={styles.clearScaleButton}
-                                title="Clear scale 2"
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      {isDraft && !isDisabled && (
-                        <div className={styles.cellControls}>
-                          {state.chord && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                saveDraft();
-                              }}
-                              className="btn btn-link btn-sm"
-                              disabled={!canSaveDraft}
-                              title={
-                                !canSaveDraft
-                                  ? 'Select a chord to save'
-                                  : 'Save this chord to the sequence'
-                              }
-                            >
-                              Save
-                            </button>
-                          )}
-                          {savedSequence.length > 0 && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                moveToPrevious();
-                              }}
-                              className="btn btn-link btn-sm"
-                            >
-                              &lt;
-                            </button>
-                          )}
-                        </div>
-                      )}
-                      {isEditing && (
-                        <div className={styles.cellControls}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSaveEdit();
-                            }}
-                            className="btn btn-primary btn-sm"
-                            title="Save changes"
-                          >
-                            <Check size={16} />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCancelEdit();
-                            }}
-                            className="btn btn-secondary btn-sm"
-                            title="Cancel editing"
-                          >
-                            <X size={16} />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteCard();
-                            }}
-                            className="btn btn-secondary btn-sm"
-                            title="Delete this card"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Beat Indicators */}
-                      <div className={styles.beatIndicators}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDecreaseBeats(index);
-                          }}
-                          className={styles.beatChevron}
-                          disabled={isDisabled || (state.beats || 4) <= 1}
-                          title="Decrease beats"
-                        >
-                          <ChevronLeft size={14} />
-                        </button>
-                        <div className={styles.beats}>
-                          {Array.from({ length: 6 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className={`${styles.beat} ${
-                                i < (state.beats || 4) ? styles.activeBeat : styles.inactiveBeat
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleIncreaseBeats(index);
-                          }}
-                          className={styles.beatChevron}
-                          disabled={isDisabled || (state.beats || 4) >= 6}
-                          title="Increase beats"
-                        >
-                          <ChevronRight size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                return (
+                  <ChordCard
+                    key={index}
+                    state={state}
+                    index={index}
+                    isDraft={isDraft}
+                    isPlaying={isPlaying}
+                    isEditing={isEditing}
+                    isDisabled={isDisabled}
+                    canSaveDraft={canSaveDraft}
+                    onPlayChord={handlePlayChord}
+                    onEditCard={() => handleEditCard(index)}
+                    onSaveEdit={handleSaveEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onDeleteCard={handleDeleteCard}
+                    onSaveDraft={saveDraft}
+                    onMoveToPrevious={savedSequence.length > 0 ? moveToPrevious : undefined}
+                    onClearChord={handleClearDraftChord}
+                    onClearS1={handleClearS1}
+                    onClearS2={handleClearS2}
+                    onIncreaseBeats={() => handleIncreaseBeats(index)}
+                    onDecreaseBeats={() => handleDecreaseBeats(index)}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -504,26 +312,7 @@ export default function SequenceBuilderPage() {
         <div className={styles.selectorRow}>
           <div className={styles.selectorSection}>
             <div className={styles.sectionHeader}>
-              <div className={styles.tabs}>
-                <button
-                  className={`${styles.tab} ${activeTab === 'chord' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('chord')}
-                >
-                  Select Chord
-                </button>
-                <button
-                  className={`${styles.tab} ${activeTab === 'scale' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('scale')}
-                >
-                  Select Scale
-                </button>
-                <button
-                  className={`${styles.tab} ${activeTab === 'scale2' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('scale2')}
-                >
-                  Select Scale 2
-                </button>
-              </div>
+              <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
             </div>
 
             {activeTab === 'chord' && (
@@ -566,27 +355,11 @@ export default function SequenceBuilderPage() {
 
           {/* Bass Note Selector */}
           {activeTab === 'chord' && (
-            <div className={styles.bassSelector}>
-              <h3 className={styles.bassSelectorTitle}>Bass Note</h3>
-              <div className={styles.bassNotes}>
-                <button
-                  onClick={() => handleBassNoteChange(null)}
-                  className={`${styles.bassNote} ${selectedBassNote === null ? styles.selectedBassNote : ''}`}
-                  title="Use chord root as bass"
-                >
-                  Root
-                </button>
-                {availableBassNotes.map((note) => (
-                  <button
-                    key={note}
-                    onClick={() => handleBassNoteChange(note)}
-                    className={`${styles.bassNote} ${selectedBassNote === note ? styles.selectedBassNote : ''}`}
-                  >
-                    {note}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <BassNoteSelector
+              selectedBassNote={selectedBassNote}
+              availableBassNotes={availableBassNotes}
+              onBassNoteChange={handleBassNoteChange}
+            />
           )}
         </div>
       </div>
