@@ -2,13 +2,12 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { Trash2, Pencil, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Chord } from '../../music/chordParser';
 import { parseChord } from '../../music/chordParser';
-import { chordToNotes } from '../../music/chordProgression';
-import { audioEngine } from '../../services/audioEngine';
 import { useSequenceBuilderStore } from '../../store/sequenceBuilderStore';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { useCatalogStore } from '../../store/catalogStore';
 import { useCatalogInit } from '../../hooks/useCatalogInit';
 import { getPitchClassFromNote } from '../../music/notes';
+import { useSequencePlayback } from './useSequencePlayback';
 import ScaleTable from '../../components/ScaleTable';
 import ChordTable from '../../components/ChordTable';
 import styles from './SequenceBuilderPage.module.css';
@@ -42,80 +41,17 @@ export default function SequenceBuilderPage() {
   // Catalog selector
   const catalog = useCatalogStore(state => state.catalog);
 
+  // Playback hook
+  const { playingIndex, handlePlayChord, handlePlaySequence, playChordWithPrevious } = useSequencePlayback({
+    tempo,
+    chordSelectionPlaybackCount,
+  });
+
   const [activeTab, setActiveTab] = useState<'chord' | 'scale' | 'scale2'>('chord');
-  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [selectedBassNote, setSelectedBassNote] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const playbackCancelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
-
-  // Get bass note for a chord (uses slash chord bass if specified, otherwise root)
-  const getBassNote = (chord: Chord): string => {
-    // Use slash chord bass note if specified, otherwise use root
-    const bassNote = chord.bass || chord.root;
-    return `${bassNote}2`; // Two octaves below (chord is at octave 4)
-  };
-
-  const handlePlayChord = async (chord: Chord | null, beats: number = 4) => {
-    if (!chord) return;
-    const notes = chordToNotes(chord);
-    if (notes.length > 0) {
-      const bassNote = getBassNote(chord);
-      const chordNotes = notes.map(note => `${note}4`);
-      const durationSeconds = (60 / tempo) * beats;
-      await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
-    }
-  };
-
-  const handlePlaySequence = async () => {
-    try {
-      // Calculate beat duration based on tempo
-      // Beat duration = 60000ms / BPM
-      const beatDuration = 60000 / tempo;
-
-      // Play all saved chords
-      for (let i = 0; i < savedSequence.length; i++) {
-        setPlayingIndex(i); // Highlight current chord
-        const state = savedSequence[i];
-
-        if (state.chord) {
-          const notes = chordToNotes(state.chord);
-          if (notes.length > 0) {
-            const bassNote = getBassNote(state.chord);
-            const chordNotes = notes.map(note => `${note}4`);
-            const beats = state.beats || 4;
-            // Calculate duration in seconds: (60 / BPM) * beats
-            const durationSeconds = (60 / tempo) * beats;
-
-            await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
-            await new Promise(resolve => setTimeout(resolve, beatDuration * beats));
-          }
-        }
-      }
-
-      // Play draft chord if it exists
-      if (draft && draft.chord) {
-        setPlayingIndex(savedSequence.length); // Highlight draft
-        const notes = chordToNotes(draft.chord);
-        if (notes.length > 0) {
-          const bassNote = getBassNote(draft.chord);
-          const chordNotes = notes.map(note => `${note}4`);
-          const beats = draft.beats || 4;
-          // Calculate duration in seconds: (60 / BPM) * beats
-          const durationSeconds = (60 / tempo) * beats;
-
-          await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
-          await new Promise(resolve => setTimeout(resolve, beatDuration * beats));
-        }
-      }
-
-      setPlayingIndex(null); // Clear highlight when done
-    } catch (error) {
-      console.error('Error playing sequence:', error);
-      setPlayingIndex(null); // Clear highlight on error
-    }
-  };
 
   const handleSelectScale = (scaleName: string, root: string) => {
     if (editingIndex !== null) {
@@ -133,44 +69,6 @@ export default function SequenceBuilderPage() {
     }
   };
 
-  const playChordWithPrevious = async (chord: Chord, cancelToken: { cancelled: boolean }, currentBeats: number = 4) => {
-    // Play previous chords + current chord
-    const beatDuration = 60000 / tempo;
-
-    // Get previous chords to play (slice(-0) returns all, so handle 0 specially)
-    const previousChords = chordSelectionPlaybackCount > 0
-      ? savedSequence.slice(-chordSelectionPlaybackCount)
-      : [];
-
-    // Play previous chords
-    for (const state of previousChords) {
-      if (cancelToken.cancelled) return; // Stop if cancelled
-
-      if (state.chord) {
-        const notes = chordToNotes(state.chord);
-        if (notes.length > 0) {
-          const bassNote = getBassNote(state.chord);
-          const chordNotes = notes.map(note => `${note}4`);
-          const beats = state.beats || 4;
-          const durationSeconds = (60 / tempo) * beats;
-          await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
-          await new Promise(resolve => setTimeout(resolve, beatDuration * beats));
-        }
-      }
-    }
-
-    if (cancelToken.cancelled) return; // Stop if cancelled
-
-    // Play the newly selected chord
-    const notes = chordToNotes(chord);
-    if (notes.length > 0) {
-      const bassNote = getBassNote(chord);
-      const chordNotes = notes.map(note => `${note}4`);
-      const durationSeconds = (60 / tempo) * currentBeats;
-      await audioEngine.playChord([bassNote, ...chordNotes], undefined, `${durationSeconds}s`);
-    }
-  };
-
   const handleSelectChord = (chord: Chord) => {
     // Apply bass note if selected
     let finalChord = chord;
@@ -182,13 +80,6 @@ export default function SequenceBuilderPage() {
         finalChord = slashChord;
       }
     }
-
-    // Cancel any ongoing playback
-    playbackCancelRef.current.cancelled = true;
-
-    // Create new cancel token for this playback
-    const cancelToken = { cancelled: false };
-    playbackCancelRef.current = cancelToken;
 
     // Update the appropriate target (editing card or draft)
     if (editingIndex !== null) {
@@ -203,7 +94,7 @@ export default function SequenceBuilderPage() {
       : (draft?.beats || 4);
 
     // Start playback async (non-blocking)
-    playChordWithPrevious(finalChord, cancelToken, currentBeats);
+    playChordWithPrevious(finalChord, savedSequence, currentBeats);
   };
 
   const handleAddChord = (chord: Chord) => {
@@ -224,13 +115,6 @@ export default function SequenceBuilderPage() {
       }
     }
 
-    // Cancel any ongoing playback
-    playbackCancelRef.current.cancelled = true;
-
-    // Create new cancel token for this playback
-    const cancelToken = { cancelled: false };
-    playbackCancelRef.current = cancelToken;
-
     // Update selection immediately
     selectChord(finalChord);
 
@@ -238,7 +122,7 @@ export default function SequenceBuilderPage() {
     const currentBeats = draft?.beats || 4;
 
     // Start playback async (non-blocking)
-    playChordWithPrevious(finalChord, cancelToken, currentBeats);
+    playChordWithPrevious(finalChord, savedSequence, currentBeats);
 
     // Save the chord
     saveDraft();
@@ -333,13 +217,6 @@ export default function SequenceBuilderPage() {
         newChord = parsed || baseChord;
       }
 
-      // Cancel any ongoing playback
-      playbackCancelRef.current.cancelled = true;
-
-      // Create new cancel token for this playback
-      const cancelToken = { cancelled: false };
-      playbackCancelRef.current = cancelToken;
-
       // Update the appropriate target
       if (editingIndex !== null) {
         updateSavedChord(editingIndex, newChord);
@@ -353,7 +230,7 @@ export default function SequenceBuilderPage() {
         : (draft?.beats || 4);
 
       // Play the chord with new bass
-      playChordWithPrevious(newChord, cancelToken, currentBeats);
+      playChordWithPrevious(newChord, savedSequence, currentBeats);
     }
   };
 
@@ -445,7 +322,7 @@ export default function SequenceBuilderPage() {
             <div className={styles.controls}>
               {savedSequence.length > 0 && (
                 <button
-                  onClick={handlePlaySequence}
+                  onClick={() => handlePlaySequence(savedSequence, draft)}
                   className="btn btn-primary btn-sm"
                 >
                   Play
