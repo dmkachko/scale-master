@@ -1,20 +1,22 @@
 /**
  * Music Theory - Note Utilities
- * Handles note naming, pitch class conversion, and note spelling
+ * Facade over Note entity for backward compatibility
+ * @deprecated Use Note entity from './entities/Note' directly for new code
  */
 
-// Note names using sharps
-export const NOTE_NAMES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+import { Note } from './entities/Note';
 
-// Note names using flats
-export const NOTE_NAMES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+// Note names using sharps - re-export from Note entity
+export const NOTE_NAMES_SHARP = Note.NOTE_NAMES_SHARP;
+
+// Note names using flats - re-export from Note entity
+export const NOTE_NAMES_FLAT = Note.NOTE_NAMES_FLAT;
 
 /**
  * Gets the note name for a pitch class
  */
 export function getNoteName(pitchClass: number, preferSharps = true): string {
-  const noteNames = preferSharps ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
-  return noteNames[pitchClass];
+  return Note.getNoteName(pitchClass, preferSharps);
 }
 
 /**
@@ -23,7 +25,7 @@ export function getNoteName(pitchClass: number, preferSharps = true): string {
 export function calculateScaleNotes(root: number, intervals: number[], preferSharps = true): string[] {
   return intervals.map((interval: number) => {
     const pitchClass = (root + interval) % 12;
-    return getNoteName(pitchClass, preferSharps);
+    return Note.getNoteName(pitchClass, preferSharps);
   });
 }
 
@@ -31,16 +33,7 @@ export function calculateScaleNotes(root: number, intervals: number[], preferSha
  * Gets pitch class (0-11) from note name
  */
 export function getPitchClassFromNote(note: string): number {
-  const noteMap: Record<string, number> = {
-    'C': 0, 'C#': 1, 'Db': 1,
-    'D': 2, 'D#': 3, 'Eb': 3,
-    'E': 4,
-    'F': 5, 'F#': 6, 'Gb': 6,
-    'G': 7, 'G#': 8, 'Ab': 8,
-    'A': 9, 'A#': 10, 'Bb': 10,
-    'B': 11
-  };
-  return noteMap[note] ?? 0;
+  return Note.NOTE_TO_PITCH_CLASS[note] ?? 0;
 }
 
 /**
@@ -85,53 +78,10 @@ export interface ParseNotesResult {
  * @returns Object with parsed notes, pitch classes (deduplicated), and any errors
  */
 export function parseNotes(input: string): ParseNotesResult {
-  const errors: string[] = [];
-  const notes: string[] = [];
-  const pitchClasses = new Set<number>();
-
-  if (!input || input.trim() === '') {
-    return { notes: [], pitchClasses: new Set(), errors: [] };
-  }
-
-  // Split by comma or whitespace
-  const tokens = input
-    .split(/[\s,]+/)
-    .map(t => t.trim())
-    .filter(t => t.length > 0);
-
-  for (const token of tokens) {
-    // Match note pattern: A-G, optional accidental (#, b, ♯, ♭), optional octave (ignored)
-    const match = token.match(/^([A-G])([#b♯♭])?(\d+)?$/i);
-
-    if (!match) {
-      errors.push(`Invalid note: "${token}"`);
-      continue;
-    }
-
-    const [, letter, accidental] = match;
-
-    // Normalize accidental symbols
-    let normalizedAccidental = '';
-    if (accidental === '#' || accidental === '♯') {
-      normalizedAccidental = '#';
-    } else if (accidental === 'b' || accidental === '♭') {
-      normalizedAccidental = 'b';
-    }
-
-    const noteName = letter.toUpperCase() + normalizedAccidental;
-    const pitchClass = getPitchClassFromNote(noteName);
-
-    if (pitchClass === -1 || pitchClass === undefined) {
-      errors.push(`Invalid note: "${token}"`);
-      continue;
-    }
-
-    // Only add if not already present (deduplicate enharmonics)
-    if (!pitchClasses.has(pitchClass)) {
-      notes.push(noteName);
-      pitchClasses.add(pitchClass);
-    }
-  }
-
-  return { notes, pitchClasses, errors };
+  const result = Note.parseNotes(input);
+  return {
+    notes: result.notes.map(note => note.name),
+    pitchClasses: new Set(result.notes.map(note => note.pitchClass)),
+    errors: result.errors,
+  };
 }
