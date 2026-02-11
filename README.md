@@ -142,9 +142,9 @@ All music theory functions are pure and testable.
 ## Documentation
 
 - [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) - Architecture overview
-- [documents/user-stories.md](./documents/user-stories.md) - Feature specifications
-- [documents/design-overview.md](./documents/design-overview.md) - System design
-- [documents/reqs.md](./documents/reqs.md) - Requirements
+- [documents/user-stories.md](documents/reqs/user-stories.md) - Feature specifications
+- [documents/design-overview.md](documents/reqs/design-overview.md) - System design
+- [documents/reqs.md](documents/reqs/reqs.md) - Requirements
 
 ## Contributing
 

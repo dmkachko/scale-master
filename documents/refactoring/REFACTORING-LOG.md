@@ -15,6 +15,7 @@ Large-scale refactoring to extract business entities to classes, consolidate ser
 - TriadsSection: 308 → ~150 lines (-51%)
 - Layout: 255 → ~120 lines (-53%)
 
+
 ### Architecture Goals
 - ✅ Extract 4 business entity classes
 - ✅ Consolidate 2 services

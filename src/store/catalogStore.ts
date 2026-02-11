@@ -1,10 +1,12 @@
 /**
  * Catalog Store
  * Global state management for the scale catalog using Zustand
+ * Uses Immer middleware for consistency
  */
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import type { Catalog, CatalogIndexes } from '../types/catalog';
 
 type CatalogStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -27,7 +29,7 @@ interface CatalogState {
 
 export const useCatalogStore = create<CatalogState>()(
   devtools(
-    (set) => ({
+    immer((set) => ({
       // Initial state
       status: 'idle',
       catalog: null,
@@ -59,7 +61,7 @@ export const useCatalogStore = create<CatalogState>()(
 
       setFilterQuery: (query) =>
         set({ filterQuery: query }, false, 'catalog/setFilterQuery'),
-    }),
+    })),
     { name: 'CatalogStore' }
   )
 );

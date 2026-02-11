@@ -1,10 +1,12 @@
 /**
  * Preferences Store
  * User preferences for note spelling and other settings
+ * Refactored with Immer for clean nested updates
  */
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import type { ScalePattern } from '../services/scalePatterns';
 
 type AccidentalPreference = 'sharps' | 'flats';
@@ -51,7 +53,7 @@ interface PreferencesState {
 export const usePreferencesStore = create<PreferencesState>()(
   devtools(
     persist(
-      (set) => ({
+      immer((set) => ({
         // Initial state
         accidentalPreference: 'sharps',
         timeSignature: '4/4',
@@ -79,9 +81,9 @@ export const usePreferencesStore = create<PreferencesState>()(
 
         toggleAccidentalPreference: () =>
           set(
-            (state) => ({
-              accidentalPreference: state.accidentalPreference === 'sharps' ? 'flats' : 'sharps',
-            }),
+            (state) => {
+              state.accidentalPreference = state.accidentalPreference === 'sharps' ? 'flats' : 'sharps';
+            },
             false,
             'preferences/toggleAccidentalPreference'
           ),
@@ -116,24 +118,18 @@ export const usePreferencesStore = create<PreferencesState>()(
 
         setSynthVolume: (type, volume) =>
           set(
-            (state) => ({
-              synthSettings: {
-                ...state.synthSettings,
-                [type]: { ...state.synthSettings[type], volume },
-              },
-            }),
+            (state) => {
+              state.synthSettings[type].volume = volume;
+            },
             false,
             'preferences/setSynthVolume'
           ),
 
         setVelocity: (type, velocity) =>
           set(
-            (state) => ({
-              velocitySettings: {
-                ...state.velocitySettings,
-                [type]: velocity,
-              },
-            }),
+            (state) => {
+              state.velocitySettings[type] = velocity;
+            },
             false,
             'preferences/setVelocity'
           ),
@@ -144,7 +140,7 @@ export const usePreferencesStore = create<PreferencesState>()(
             false,
             'preferences/setChordSelectionPlaybackCount'
           ),
-      }),
+      })),
       {
         name: 'scale-master-preferences',
       }

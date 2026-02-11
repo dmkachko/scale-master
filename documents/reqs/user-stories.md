@@ -14,7 +14,7 @@
 
 **As a user**, I want the app to load a built-in catalog of scale types so that all features operate on a known dataset.
 
-> **Note**: Test cases for US-01 are documented in [US-01-test-cases.md](./US-01-test-cases.md)
+> **Note**: Test cases for US-01 are documented in [US-01-test-cases.md](US-01-test-cases.md)
 
 ---
 

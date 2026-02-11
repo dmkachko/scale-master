@@ -1,10 +1,12 @@
 /**
  * Audio Playback Store
  * Global state for audio playback
+ * Uses Immer middleware for consistency
  */
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 
 interface AudioState {
   isPlaying: boolean;
@@ -21,7 +23,7 @@ interface AudioState {
 
 export const useAudioStore = create<AudioState>()(
   devtools(
-    (set) => ({
+    immer((set) => ({
       // Initial state
       isPlaying: false,
       currentNoteIndex: null,
@@ -56,7 +58,7 @@ export const useAudioStore = create<AudioState>()(
           false,
           'audio/stopAll'
         ),
-    }),
+    })),
     { name: 'AudioStore' }
   )
 );
